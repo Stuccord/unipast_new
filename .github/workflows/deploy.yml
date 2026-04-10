@@ -20,10 +20,8 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Create dummy .env for build (Required if in pubspec)
-        run: |
-          mkdir -p assets
-          touch assets/.env
+      - name: Create dummy .env for build (Optional but often needed if in pubspec)
+        run: touch .env
 
       - name: Install Dependencies
         run: flutter pub get
