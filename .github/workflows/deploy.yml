@@ -20,8 +20,12 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Create dummy .env for build (Optional but often needed if in pubspec)
-        run: touch .env
+      - name: Create .env from secrets
+        run: |
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+          echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
+          echo "PAYSTACK_PUBLIC_KEY=${{ secrets.PAYSTACK_PUBLIC_KEY }}" >> .env
+          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
 
       - name: Install Dependencies
         run: flutter pub get
