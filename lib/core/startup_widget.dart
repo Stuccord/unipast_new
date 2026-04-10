@@ -28,7 +28,7 @@ class _AppStartupWidgetState extends State<AppStartupWidget> {
   Future<void> _loadDependencies() async {
     try {
       // 1. Load Environment Variables
-      await dotenv.load(fileName: ".env");
+      await dotenv.load(fileName: "assets/.env");
 
       // 2. Initialize Supabase
       final url = SupabaseConfig.url;
