@@ -19,7 +19,7 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { email, amount, currency, user_id } = await req.json();
+    const { email, amount, currency, user_id, callback_url } = await req.json();
 
     if (!email || !amount) {
       return new Response(
@@ -48,7 +48,7 @@ serve(async (req: Request) => {
         email,
         amount,                        // in pesewas (GHS 30.00 = 3000)
         currency: currency ?? 'GHS',
-        callback_url: 'https://unipast.app/payment/callback',
+        callback_url: callback_url ?? 'https://unipast.app/payment/callback',
         metadata: {
           user_id: user_id, // Store Supabase ID in Paystack for instant webhook identification
         },

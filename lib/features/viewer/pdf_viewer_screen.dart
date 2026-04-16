@@ -6,6 +6,7 @@ import 'package:unipast/features/viewer/ai_explanation_sheet.dart';
 import 'package:unipast/features/viewer/ai_summary_sheet.dart';
 import 'package:unipast/features/viewer/ai_quiz_screen.dart';
 import 'package:unipast/features/viewer/ai_ask_tutor_sheet.dart';
+import 'package:unipast/features/viewer/god_mind_screen.dart';
 import 'package:unipast/core/theme.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -158,6 +159,16 @@ class _PdfViewerScreenState extends ConsumerState<PdfViewerScreen> {
         backgroundColor: Colors.transparent,
         builder: (context) => AIAskTutorSheet(documentText: text),
       );
+    } else if (tool == 'GodMind') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => GodMindScreen(
+            documentText: text,
+            documentTitle: 'Past Question',
+          ),
+        ),
+      );
     }
   }
 
@@ -211,30 +222,33 @@ class _PdfViewerScreenState extends ConsumerState<PdfViewerScreen> {
 
   String _toolTitle(String tool) {
     switch (tool) {
-      case 'Explain': return 'AI Explain';
-      case 'Summary': return 'AI Summary';
-      case 'Quiz':    return 'AI Quiz';
+      case 'Explain':  return 'AI Explain';
+      case 'Summary':  return 'AI Summary';
+      case 'Quiz':     return 'AI Quiz';
       case 'AskTutor': return 'Ask Tutor';
+      case 'GodMind':  return 'God Mind';
       default: return 'AI Tool';
     }
   }
 
   IconData _toolIcon(String tool) {
     switch (tool) {
-      case 'Explain': return Icons.auto_awesome_rounded;
-      case 'Summary': return Icons.summarize_rounded;
-      case 'Quiz':    return Icons.quiz_rounded;
+      case 'Explain':  return Icons.auto_awesome_rounded;
+      case 'Summary':  return Icons.summarize_rounded;
+      case 'Quiz':     return Icons.quiz_rounded;
       case 'AskTutor': return Icons.psychology_alt_rounded;
+      case 'GodMind':  return Icons.hub_rounded;
       default: return Icons.smart_toy_rounded;
     }
   }
 
   Color _toolColor(String tool) {
     switch (tool) {
-      case 'Explain': return AppTheme.primaryTeal;
-      case 'Summary': return Colors.orange;
-      case 'Quiz':    return Colors.purple;
+      case 'Explain':  return AppTheme.primaryTeal;
+      case 'Summary':  return Colors.orange;
+      case 'Quiz':     return Colors.purple;
       case 'AskTutor': return Colors.blue;
+      case 'GodMind':  return const Color(0xFF00E5CC);
       default: return Colors.grey;
     }
   }
@@ -295,6 +309,13 @@ class _PdfViewerScreenState extends ConsumerState<PdfViewerScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (_showTools) ...[
+                   _buildToolButton(
+                    'God Mind  ✨',
+                    Icons.hub_rounded,
+                    const Color(0xFF00E5CC),
+                    () => _handleStudyTool('GodMind'),
+                  ),
+                  const SizedBox(height: 12),
                   _buildToolButton(
                     'Ask Tutor',
                     Icons.psychology_alt_rounded,

@@ -4,6 +4,11 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   email TEXT UNIQUE,
   full_name TEXT,
   avatar_url TEXT,
+  university_id TEXT,
+  faculty_id TEXT,
+  programme_id TEXT,
+  current_level INTEGER DEFAULT 100,
+  current_semester INTEGER DEFAULT 1,
   is_admin BOOLEAN DEFAULT false,
   is_rep BOOLEAN DEFAULT false,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -89,9 +94,26 @@ DROP TRIGGER IF EXISTS on_activity_signup_trial ON public.activities;
 CREATE OR REPLACE FUNCTION public.handle_new_user() 
 RETURNS TRIGGER AS $$
 BEGIN
-  -- We ONLY insert the profile. NO subscription logic should EVER be here.
-  INSERT INTO public.profiles (id, email, full_name)
-  VALUES (new.id, new.email, new.raw_user_meta_data->>'full_name');
+  INSERT INTO public.profiles (
+    id, 
+    email, 
+    full_name,
+    university_id,
+    faculty_id,
+    programme_id,
+    current_level,
+    current_semester
+  )
+  VALUES (
+    new.id, 
+    new.email, 
+    new.raw_user_meta_data->>'full_name',
+    new.raw_user_meta_data->>'university_id',
+    new.raw_user_meta_data->>'faculty_id',
+    new.raw_user_meta_data->>'programme_id',
+    (new.raw_user_meta_data->>'current_level')::integer,
+    (new.raw_user_meta_data->>'current_semester')::integer
+  );
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -152,3 +174,32 @@ $$;
 REVOKE EXECUTE ON FUNCTION activate_subscription(UUID, TEXT, INTEGER, TEXT, TIMESTAMP WITH TIME ZONE, TEXT) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION activate_subscription(UUID, TEXT, INTEGER, TEXT, TIMESTAMP WITH TIME ZONE, TEXT) FROM authenticated;
 REVOKE EXECUTE ON FUNCTION activate_subscription(UUID, TEXT, INTEGER, TEXT, TIMESTAMP WITH TIME ZONE, TEXT) FROM anon;
+
+-- 8. ACADEMIC & CONTENT RLS
+-- Ensure universities, faculties, programmes, courses, and past_questions are readable by all users.
+
+-- Universities
+ALTER TABLE IF EXISTS public.universities ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Universities are viewable by everyone" ON public.universities;
+CREATE POLICY "Universities are viewable by everyone" ON public.universities FOR SELECT USING (true);
+
+-- Faculties
+ALTER TABLE IF EXISTS public.faculties ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Faculties are viewable by everyone" ON public.faculties;
+CREATE POLICY "Faculties are viewable by everyone" ON public.faculties FOR SELECT USING (true);
+
+-- Programmes
+ALTER TABLE IF EXISTS public.programmes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Programmes are viewable by everyone" ON public.programmes;
+CREATE POLICY "Programmes are viewable by everyone" ON public.programmes FOR SELECT USING (true);
+
+-- Courses
+ALTER TABLE IF EXISTS public.courses ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Courses are viewable by everyone" ON public.courses;
+CREATE POLICY "Courses are viewable by everyone" ON public.courses FOR SELECT USING (true);
+
+-- Past Questions
+ALTER TABLE IF EXISTS public.past_questions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Past Questions are viewable by everyone" ON public.past_questions;
+CREATE POLICY "Past Questions are viewable by everyone" ON public.past_questions FOR SELECT USING (true);
+

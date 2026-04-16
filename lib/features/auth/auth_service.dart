@@ -28,6 +28,7 @@ class AuthService {
     return await _client.auth.signUp(
       email: email,
       password: password,
+      emailRedirectTo: SupabaseConfig.redirectUrl,
       data: {
         'phone': phone,
         if (metadata != null) ...metadata,

@@ -36,15 +36,6 @@ class _PaymentWebViewState extends State<PaymentWebView> {
 
   Future<void> _initPayment() async {
     try {
-      if (kIsWeb || 
-          (defaultTargetPlatform != TargetPlatform.android && 
-           defaultTargetPlatform != TargetPlatform.iOS)) {
-        throw Exception(
-          'In-App Payment is only fully supported on mobile devices (Android/iOS).\n\n'
-          'Please continue by clicking "Open External Checkout" below.'
-        );
-      }
-
       final data = await widget.initialFuture;
       if (data == null) throw Exception('Could not get payment details from server');
       
@@ -52,6 +43,26 @@ class _PaymentWebViewState extends State<PaymentWebView> {
       _serverReference = data['reference'];
 
       if (_rawUrl == null) throw Exception('Payment URL is missing');
+
+      if (kIsWeb) {
+        // On web: redirect the browser tab directly to Paystack checkout.
+        // Paystack will redirect back to the callback_url after payment.
+        final uri = Uri.parse(_rawUrl!);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.platformDefault);
+        }
+        // Pop this widget — the browser has navigated away
+        if (mounted) Navigator.of(context).pop();
+        return;
+      }
+
+      if (defaultTargetPlatform != TargetPlatform.android &&
+          defaultTargetPlatform != TargetPlatform.iOS) {
+        throw Exception(
+          'In-App Payment is only fully supported on mobile devices (Android/iOS).\n\n'
+          'Please continue by clicking "Open External Checkout" below.'
+        );
+      }
       
       if (!mounted) return;
 

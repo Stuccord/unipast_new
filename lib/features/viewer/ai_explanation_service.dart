@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -129,4 +130,66 @@ class AIExplanationService {
       return '❌ **Error**: $e';
     }
   }
+
+  /// Generates a mind map / topic breakdown for the God Mind screen.
+  Future<List<MindNode>> generateMindMap(String documentText) async {
+    if (_apiKey.isEmpty || _apiKey == 'YOUR_KEY_HERE') {
+      return [MindNode(topic: 'API Key Missing', icon: '⚠️', summary: 'Add GEMINI_API_KEY to .env', subtopics: [])];
+    }
+
+    final prompt = [
+      Content.text(
+        "Analyze this university exam document and extract the core knowledge structure.\n\n"
+        "Document: $documentText\n\n"
+        "Return ONLY a valid JSON array (no markdown, no preamble) with exactly 5-7 topic nodes:\n"
+        "[\n"
+        "  {\n"
+        "    \"topic\": \"Topic Name (short, 2-4 words)\",\n"
+        "    \"icon\": \"single emoji representing the topic\",\n"
+        "    \"summary\": \"one sentence description (max 12 words)\",\n"
+        "    \"subtopics\": [\"key term 1\", \"key term 2\", \"key term 3\"]\n"
+        "  }\n"
+        "]\n"
+        "Ensure the output is pure JSON only."
+      )
+    ];
+
+    try {
+      final response = await _model.generateContent(prompt);
+      final text = response.text
+          ?.replaceAll('```json', '')
+          .replaceAll('```', '')
+          .trim() ?? '[]';
+      final List<dynamic> data = jsonDecode(text);
+      return data.map((e) => MindNode.fromJson(e)).toList();
+    } catch (e) {
+      return [
+        MindNode(topic: 'Parse Error', icon: '❌', summary: 'Could not generate mind map', subtopics: [e.toString()]),
+      ];
+    }
+  }
 }
+
+class MindNode {
+  final String topic;
+  final String icon;
+  final String summary;
+  final List<String> subtopics;
+
+  MindNode({
+    required this.topic,
+    required this.icon,
+    required this.summary,
+    required this.subtopics,
+  });
+
+  factory MindNode.fromJson(Map<String, dynamic> json) {
+    return MindNode(
+      topic: json['topic'] ?? 'Unknown',
+      icon: json['icon'] ?? '📚',
+      summary: json['summary'] ?? '',
+      subtopics: List<String>.from(json['subtopics'] ?? []),
+    );
+  }
+}
+

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unipast/core/supabase_config.dart';
@@ -18,11 +19,19 @@ class PaymentService {
     required String userId,
   }) async {
     try {
+      // On web, Paystack redirects back to the Next.js web app which verifies
+      // & activates the subscription server-side.
+      // On mobile, we use the app's deep link; verification is handled in-app.
+      final callbackUrl = kIsWeb
+          ? SupabaseConfig.webPaymentCallbackUrl
+          : 'https://unipast.app/payment/callback';
+
       final response = await _client.functions.invoke('paystack-init', body: {
         'email': email,
         'amount': amountPesewas,
         'currency': 'GHS',
         'user_id': userId,
+        'callback_url': callbackUrl,
       }, headers: {
         'apikey': SupabaseConfig.anonKey,
       });

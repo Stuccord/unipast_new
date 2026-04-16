@@ -13,15 +13,16 @@ class QuestionService {
   QuestionService(this._client);
 
   Future<List<PastQuestion>> getQuestionsByCourse(String courseId) async {
-    final response = await _client
+    final List<dynamic> response = await _client
         .from('past_questions')
         .select()
         .eq('course_id', courseId)
         .order('year', ascending: false);
     
-    return (response as List).map((json) {
-      final question = PastQuestion.fromJson(json);
-      // Map file_path to actual public url
+    if (response.isEmpty) return [];
+
+    return response.map((json) {
+      final question = PastQuestion.fromJson(json as Map<String, dynamic>);
       final publicUrl = getFileUrl(question.pdfUrl);
       return PastQuestion(
         id: question.id,
@@ -36,16 +37,16 @@ class QuestionService {
   }
 
   Future<List<PastQuestion>> getQuestionsByProgramme(String programmeId) async {
-    // Usually, programmes have courses. If we need to fetch all questions for a programme,
-    // we'd join through courses. For now, fetch all or fallback. Here we'll just return early or query by programme if available.
-    final response = await _client
+    final List<dynamic> response = await _client
         .from('past_questions')
         .select('*, courses!inner(*)')
         .eq('courses.programme_id', programmeId)
         .order('year', ascending: false);
 
-    return (response as List).map((json) {
-      final question = PastQuestion.fromJson(json);
+    if (response.isEmpty) return [];
+
+    return response.map((json) {
+      final question = PastQuestion.fromJson(json as Map<String, dynamic>);
       final publicUrl = getFileUrl(question.pdfUrl);
       return PastQuestion(
         id: question.id,

@@ -3,7 +3,7 @@ import https from 'https';
 const SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6YnFzdmZ4cGtheWdvY2pvZGprIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjc4NDYxNCwiZXhwIjoyMDg4MzYwNjE0fQ.Yd2Y-L4QLeCtx--6-pCBWF2QI2dyw6RgWOF0yUzicjg';
 const SUPABASE_URL = 'hzbqsvfxpkaygocjodjk.supabase.co';
 const EMAIL = 'admin@unipast.com';
-const PASSWORD = 'Ebube123...@';
+const PASSWORD = 'Ebube123...';
 
 function request(options, body) {
     return new Promise((resolve, reject) => {
@@ -40,7 +40,8 @@ async function main() {
     }, {
         email: EMAIL,
         password: PASSWORD,
-        email_confirm: true
+        email_confirm: true,
+        user_metadata: { full_name: 'Admin' }
     });
 
     console.log('Create user response status:', createRes.status);

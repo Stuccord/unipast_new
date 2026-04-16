@@ -1,7 +1,7 @@
 $serviceRoleKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6YnFzdmZ4cGtheWdvY2pvZGprIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjc4NDYxNCwiZXhwIjoyMDg4MzYwNjE0fQ.Yd2Y-L4QLeCtx--6-pCBWF2QI2dyw6RgWOF0yUzicjg"
 $supabaseUrl = "https://hzbqsvfxpkaygocjodjk.supabase.co"
 $email = "admin@unipast.com"
-$password = "Ebube123...@"
+$password = "Ebube123..."
 
 $headers = @{
     "apikey"        = $serviceRoleKey
@@ -36,11 +36,11 @@ try {
         full_name = "Admin"
     } | ConvertTo-Json
 
-    $profileResponse = Invoke-RestMethod `
+    Invoke-RestMethod `
         -Uri "$supabaseUrl/rest/v1/profiles?id=eq.$userId" `
         -Method Patch `
         -Headers ($headers + @{ "Prefer" = "return=representation" }) `
-        -Body $profileBody
+        -Body $profileBody | Out-Null
 
     Write-Host "SUCCESS: Profile updated - is_admin set to true."
     Write-Host ""
