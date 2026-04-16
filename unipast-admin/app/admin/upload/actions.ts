@@ -28,6 +28,7 @@ export async function uploadPastQuestion(formData: FormData) {
 
     const { error: dbError } = await supabaseAdmin.from('past_questions').insert({
         course_id,
+        title,
         year,
         semester,
         pdf_url: filePath,

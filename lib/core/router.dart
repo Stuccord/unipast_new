@@ -149,6 +149,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             pdfUrl: extra?['url'] ?? '',
             userName: extra?['userName'] ?? 'User',
             questionId: extra?['id'] ?? 'unknown',
+            title: extra?['title'] ?? 'Past Question',
           );
         },
       ),

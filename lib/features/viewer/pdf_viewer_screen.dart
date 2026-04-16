@@ -19,6 +19,7 @@ class PdfViewerScreen extends ConsumerStatefulWidget {
   final String pdfUrl;
   final String userName;
   final String questionId;
+  final String title;
   final bool isLocal;
 
   const PdfViewerScreen({
@@ -26,6 +27,7 @@ class PdfViewerScreen extends ConsumerStatefulWidget {
     required this.pdfUrl,
     required this.userName,
     required this.questionId,
+    required this.title,
     this.isLocal = false,
   });
 
@@ -165,7 +167,7 @@ class _PdfViewerScreenState extends ConsumerState<PdfViewerScreen> {
         MaterialPageRoute(
           builder: (context) => GodMindScreen(
             documentText: text,
-            documentTitle: 'Past Question',
+            documentTitle: widget.title,
           ),
         ),
       );
@@ -198,7 +200,7 @@ class _PdfViewerScreenState extends ConsumerState<PdfViewerScreen> {
         questionId: widget.questionId,
         bucket: 'past_questions', // Assuming default bucket, might need to extract from URL if dynamic
         path: widget.pdfUrl.split('past_questions/').last, // Extract path
-        title: 'Past Question', // Or ideally pass title down
+        title: widget.title,
         userName: widget.userName,
       );
 
@@ -226,7 +228,7 @@ class _PdfViewerScreenState extends ConsumerState<PdfViewerScreen> {
       case 'Summary':  return 'AI Summary';
       case 'Quiz':     return 'AI Quiz';
       case 'AskTutor': return 'Ask Tutor';
-      case 'GodMind':  return 'God Mind';
+      case 'GodMind':  return 'UniPast AI';
       default: return 'AI Tool';
     }
   }
@@ -258,7 +260,7 @@ class _PdfViewerScreenState extends ConsumerState<PdfViewerScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[900],
       appBar: AppBar(
-        title: const Text('Past Question'),
+        title: Text(widget.title),
         backgroundColor: Colors.black.withAlpha(200),
         foregroundColor: Colors.white,
         actions: [
@@ -310,7 +312,7 @@ class _PdfViewerScreenState extends ConsumerState<PdfViewerScreen> {
               children: [
                 if (_showTools) ...[
                    _buildToolButton(
-                    'God Mind  ✨',
+                    'UniPast AI  ✨',
                     Icons.hub_rounded,
                     const Color(0xFF00E5CC),
                     () => _handleStudyTool('GodMind'),

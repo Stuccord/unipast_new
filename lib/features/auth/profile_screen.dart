@@ -1,17 +1,19 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
+
 import 'package:unipast/features/auth/profile_service.dart';
 import 'package:unipast/features/auth/auth_service.dart';
 import 'package:unipast/features/auth/stats_service.dart';
 import 'package:unipast/features/payment/payment_service.dart';
-import 'package:intl/intl.dart';
 import 'package:unipast/core/lookup_data.dart';
-import 'package:unipast/core/theme_provider.dart';
-import 'package:unipast/core/theme.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:shimmer/shimmer.dart';
+
+import 'package:unipast/core/god_mind_theme.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -36,7 +38,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      // Refresh subscription and profile stats when user returns to app
       ref.invalidate(mySubscriptionProvider);
       ref.invalidate(profileStatsProvider);
     }
@@ -47,310 +48,249 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
     final profileAsync = ref.watch(myProfileProvider);
     final subscriptionAsync = ref.watch(mySubscriptionProvider);
     final statsAsync = ref.watch(profileStatsProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentUser = ref.watch(authServiceProvider).currentUser;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
-      body: profileAsync.when(
-        data: (profile) {
-          if (profile == null) {
-            return const Center(child: Text('Profile not found'));
-          }
-          return CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              // Premium Hero Header
-              _ProfileSliverHeader(profile: profile, isDark: isDark),
+      backgroundColor: GMTheme.bg,
+      body: Stack(
+        children: [
+          const AnimatedNeuralBg(),
+          profileAsync.when(
+            data: (profile) {
+              if (profile == null) return const Center(child: Text('Profile not found', style: TextStyle(color: GMTheme.text)));
+              
+              return CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+                  _GodMindProfileHeader(profile: profile),
 
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Greeting
-                      Text(
-                        'Hello, ${profile.fullName.split(' ')[0]} – Your study hub',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: isDark ? Colors.white70 : Colors.black54,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Subscription Status Card
-                      subscriptionAsync.when(
-                        data: (sub) => _PremiumSubscriptionCard(
-                          sub: sub,
-                          isDark: isDark,
-                        ),
-                        loading: () => const _ShimmerCard(),
-                        error: (e, s) => const SizedBox.shrink(),
-                      ),
-                      const SizedBox(height: 32),
-
-                      // Quick Stats
-                      _QuickStatsRow(
-                        isDark: isDark,
-                        stats: statsAsync.valueOrNull ?? {
-                          'viewed': '0',
-                          'stored': '0',
-                          'streaks': '0d',
-                        },
-                      ),
-                      const SizedBox(height: 32),
-
-                      // Personal Information Section
-                      _SectionHeader(
-                          title: 'Personal Information', isDark: isDark),
-                      const SizedBox(height: 12),
-                      _SettingsCard(
-                        isDark: isDark,
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _SettingsTile(
-                            icon: Icons.school_outlined,
-                            title: 'Academic Details',
-                            subtitle:
-                                '${LookupData.getProgrammeName(profile.programmeId)} • Level ${profile.currentLevel}',
-                            onTap: () => context.push('/profile/edit'),
+                          const SizedBox(height: 12),
+                          // Subscription Status Card
+                          subscriptionAsync.when(
+                            data: (sub) => _PremiumSubscriptionCard(sub: sub),
+                            loading: () => const _GodMindShimmerCard(),
+                            error: (e, s) => const SizedBox.shrink(),
                           ),
-                          _SettingsTile(
-                            icon: Icons.email_outlined,
-                            title: 'Email Address',
-                            subtitle: currentUser?.email ?? 'Unavailable',
-                            onTap: null,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 32),
+                          const SizedBox(height: 32),
 
-                      // Settings & Preferences
-                      _SectionHeader(title: 'App Settings', isDark: isDark),
-                      const SizedBox(height: 12),
-                      _SettingsCard(
-                        isDark: isDark,
-                        children: [
-                          _SettingsTile(
-                            icon: Icons.dark_mode_outlined,
-                            title: 'Dark Mode',
-                            trailing: Consumer(
-                              builder: (context, ref, _) {
-                                final themeMode = ref.watch(themeProvider);
-                                return Switch.adaptive(
-                                  value: themeMode == ThemeMode.dark ||
-                                      (themeMode == ThemeMode.system &&
-                                          Theme.of(context).brightness ==
-                                              Brightness.dark),
-                                  activeTrackColor:
-                                      AppTheme.accentGold.withAlpha(100),
-                                  activeThumbColor: AppTheme.accentGold,
-                                  onChanged: (val) {
-                                    ref
-                                        .read(themeProvider.notifier)
-                                        .toggleTheme(val);
-                                  },
-                                );
-                              },
-                            ),
+                          // Quick Stats
+                          _QuickStatsRow(
+                            stats: statsAsync.valueOrNull ?? {
+                              'viewed': '0',
+                              'stored': '0',
+                              'streaks': '0d',
+                            },
                           ),
-                          _SettingsTile(
-                            icon: Icons.notifications_none_outlined,
-                            title: 'Notifications',
-                            onTap: () => context.push('/notifications'),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 32),
+                          const SizedBox(height: 32),
 
-                      // Admin Section (Only for Admins)
-                      if (profile.isAdmin) ...[
-                        _SectionHeader(title: 'Administration', isDark: isDark),
-                        const SizedBox(height: 12),
-                        _SettingsCard(
-                          isDark: isDark,
-                          children: [
-                            _SettingsTile(
-                              icon: Icons.admin_panel_settings_outlined,
-                              title: 'Admin Dashboard',
-                              subtitle: 'Manage platform content & users',
-                              onTap: () => context.push('/admin'),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 32),
-                      ],
-
-                      // Support & About
-                      _SectionHeader(title: 'Support', isDark: isDark),
-                      const SizedBox(height: 12),
-                      _SettingsCard(
-                        isDark: isDark,
-                        children: [
-                          _SettingsTile(
-                            icon: Icons.help_outline_rounded,
-                            title: 'Privacy & Terms',
-                            onTap: () => launchUrl(
-                              Uri.parse('https://unipast.com/privacy'),
-                              mode: LaunchMode.externalApplication,
-                            ),
-                          ),
-                          _SettingsTile(
-                            icon: Icons.info_outline_rounded,
-                            title: 'About UniPast',
-                            onTap: () => showAboutDialog(
-                              context: context,
-                              applicationName: 'UniPast',
-                              applicationVersion: '1.0.2',
-                              applicationLegalese: '© 2026 UniPast. Made with care in Ghana.',
-                              applicationIcon: const Icon(Icons.school, size: 48, color: AppTheme.primaryTeal),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 48),
-                      Center(
-                        child: TextButton.icon(
-                          onPressed: () =>
-                              ref.read(authServiceProvider).signOut(),
-                          icon: const Icon(Icons.logout_rounded,
-                              color: Colors.red),
-                          label: Text(
-                            'Log Out of Account',
-                            style: GoogleFonts.inter(
-                              color: Colors.red,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Footer
-                      Center(
-                        child: Column(
-                          children: [
-                            Text(
-                              'Version 1.0.2',
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                color: isDark ? Colors.white24 : Colors.black26,
+                          // Personal Information Section
+                          const _SectionTitle(title: 'Personal Information'),
+                          const SizedBox(height: 16),
+                          _GodMindSettingsCard(
+                            children: [
+                              _GodMindSettingsTile(
+                                icon: Icons.school_rounded,
+                                iconColor: GMTheme.primary,
+                                title: 'Academic Details',
+                                subtitle: '${LookupData.getProgrammeName(profile.programmeId)} • Level ${profile.currentLevel}',
+                                onTap: () => context.push('/profile/edit'),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Made with ',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white38 : Colors.black38,
-                                  ),
+                              _GodMindSettingsTile(
+                                icon: Icons.email_rounded,
+                                iconColor: GMTheme.secondary,
+                                title: 'Email Address',
+                                subtitle: currentUser?.email ?? 'Unavailable',
+                                showArrow: false,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 32),
+
+                          // Settings & Preferences
+                          const _SectionTitle(title: 'App Settings'),
+                          const SizedBox(height: 16),
+                          _GodMindSettingsCard(
+                            children: [
+                              _GodMindSettingsTile(
+                                icon: Icons.sync_rounded,
+                                iconColor: GMTheme.primary,
+                                title: 'Smart Auto-Sync',
+                                subtitle: 'Download new past questions on Wi-Fi',
+                                trailing: Consumer(
+                                  builder: (context, ref, _) {
+                                    return Switch.adaptive(
+                                      value: true,
+                                      activeTrackColor: GMTheme.primary.withAlpha(100),
+                                      activeThumbColor: GMTheme.primary,
+                                      onChanged: (val) {
+                                      },
+                                    );
+                                  },
                                 ),
-                                const Icon(Icons.favorite, size: 12, color: Colors.red),
-                                Text(
-                                  ' in Ghana',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white38 : Colors.black38,
-                                  ),
+                              ),
+                              _GodMindSettingsTile(
+                                icon: Icons.notifications_none_rounded,
+                                iconColor: GMTheme.accent,
+                                title: 'Notifications',
+                                onTap: () => context.push('/notifications'),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 32),
+
+                          // Admin Section
+                          if (profile.isAdmin) ...[
+                            const _SectionTitle(title: 'Administration'),
+                            const SizedBox(height: 16),
+                            _GodMindSettingsCard(
+                              children: [
+                                _GodMindSettingsTile(
+                                  icon: Icons.admin_panel_settings_rounded,
+                                  iconColor: GMTheme.danger,
+                                  title: 'Admin Dashboard',
+                                  subtitle: 'Manage platform content & users',
+                                  onTap: () => context.push('/admin'),
                                 ),
                               ],
                             ),
+                            const SizedBox(height: 32),
                           ],
-                        ),
+
+                          // Support & About
+                          const _SectionTitle(title: 'Support'),
+                          const SizedBox(height: 16),
+                          _GodMindSettingsCard(
+                            children: [
+                              _GodMindSettingsTile(
+                                icon: Icons.shield_rounded,
+                                iconColor: GMTheme.textMuted,
+                                title: 'Privacy & Terms',
+                                onTap: () => launchUrl(
+                                  Uri.parse('https://unipast.com/privacy'),
+                                  mode: LaunchMode.externalApplication,
+                                ),
+                              ),
+                              _GodMindSettingsTile(
+                                icon: Icons.info_rounded,
+                                iconColor: GMTheme.textMuted,
+                                title: 'About UniPast',
+                                onTap: () => showAboutDialog(
+                                  context: context,
+                                  applicationName: 'UniPast',
+                                  applicationVersion: 'Premium Edition',
+                                  applicationIcon: const Icon(Icons.rocket_launch_rounded, size: 48, color: GMTheme.primary),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 48),
+
+                          // Logout Button
+                          Center(
+                            child: ElevatedButton.icon(
+                              onPressed: () => ref.read(authServiceProvider).signOut(),
+                              icon: const Icon(Icons.power_settings_new_rounded, color: Colors.white),
+                              label: Text(
+                                'Initiate Logout',
+                                style: GoogleFonts.orbitron(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: 1),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: GMTheme.danger.withAlpha(80),
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                side: BorderSide(color: GMTheme.danger.withAlpha(150)),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 100),
+                        ],
                       ),
-                      const SizedBox(height: 100),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            ],
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, s) => Center(child: Text('Error: $e')),
+                ],
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator(color: GMTheme.primary)),
+            error: (e, s) => Center(child: Text('Error: $e', style: const TextStyle(color: GMTheme.danger))),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _ProfileSliverHeader extends StatelessWidget {
+class _GodMindProfileHeader extends StatelessWidget {
   final dynamic profile;
-  final bool isDark;
 
-  const _ProfileSliverHeader({required this.profile, required this.isDark});
+  const _GodMindProfileHeader({required this.profile});
 
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
       expandedHeight: 280,
       pinned: true,
-      backgroundColor: AppTheme.primaryTeal,
-      flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppTheme.primaryTeal,
-                AppTheme.primaryTeal.withAlpha(200),
-                isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
-              ],
-              stops: const [0.0, 0.4, 0.9],
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(height: 40),
-              // Avatar with Border
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundColor: AppTheme.primaryTeal.withAlpha(30),
-                  child: const Icon(Icons.person,
-                      size: 50, color: AppTheme.primaryTeal),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Name
-              Text(
-                profile.fullName,
-                style: GoogleFonts.playfairDisplay(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 8),
-              // Badges
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _Badge(
-                      text: 'Level ${profile.currentLevel}',
-                      color: AppTheme.accentGold),
-                  const SizedBox(width: 8),
-                  _Badge(
-                      text: 'Sem ${profile.currentSemester}',
-                      color: Colors.white24,
-                      isBordered: true),
+      backgroundColor: Colors.transparent,
+      flexibleSpace: ClipRRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  GMTheme.primary.withAlpha(20),
+                  GMTheme.bg.withAlpha(150),
                 ],
               ),
-            ],
+            ),
+            child: FlexibleSpaceBar(
+              background: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 40),
+                  Container(
+                    width: 110,
+                    height: 110,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [GMTheme.primary.withAlpha(40), GMTheme.primary.withAlpha(10)],
+                      ),
+                      border: Border.all(color: GMTheme.primary.withAlpha(80), width: 2),
+                      boxShadow: [BoxShadow(color: GMTheme.primary.withAlpha(40), blurRadius: 20)],
+                    ),
+                    child: const Icon(Icons.person_rounded, size: 50, color: GMTheme.primary),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    profile.fullName,
+                    style: GoogleFonts.orbitron(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: GMTheme.text,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _GodMindBadge(text: 'LEVEL ${profile.currentLevel}', color: GMTheme.accent),
+                      const SizedBox(width: 8),
+                      _GodMindBadge(text: 'SEM ${profile.currentSemester}', color: GMTheme.secondary, isOutlined: true),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -358,29 +298,29 @@ class _ProfileSliverHeader extends StatelessWidget {
   }
 }
 
-class _Badge extends StatelessWidget {
+class _GodMindBadge extends StatelessWidget {
   final String text;
   final Color color;
-  final bool isBordered;
+  final bool isOutlined;
 
-  const _Badge(
-      {required this.text, required this.color, this.isBordered = false});
+  const _GodMindBadge({required this.text, required this.color, this.isOutlined = false});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
-        color: isBordered ? null : color,
+        color: isOutlined ? Colors.transparent : color.withAlpha(20),
         borderRadius: BorderRadius.circular(20),
-        border: isBordered ? Border.all(color: Colors.white) : null,
+        border: Border.all(color: isOutlined ? GMTheme.textMuted.withAlpha(50) : color.withAlpha(60)),
       ),
       child: Text(
         text,
-        style: GoogleFonts.inter(
-          fontSize: 12,
+        style: GoogleFonts.firaCode(
+          fontSize: 11,
           fontWeight: FontWeight.bold,
-          color: isBordered ? Colors.white : Colors.black87,
+          color: isOutlined ? GMTheme.textMuted : color,
+          letterSpacing: 1,
         ),
       ),
     );
@@ -389,271 +329,251 @@ class _Badge extends StatelessWidget {
 
 class _PremiumSubscriptionCard extends StatelessWidget {
   final dynamic sub;
-  final bool isDark;
 
-  const _PremiumSubscriptionCard({this.sub, required this.isDark});
+  const _PremiumSubscriptionCard({this.sub});
 
   @override
   Widget build(BuildContext context) {
     final bool isActive = sub != null && sub.isActive;
-
-    return Card(
-      elevation: 4,
-      shadowColor: AppTheme.accentGold.withAlpha(50),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      color: isActive
-          ? (isDark ? const Color(0xFF1E293B) : Colors.white)
-          : AppTheme.primaryTeal,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppTheme.accentGold.withAlpha(isActive ? 40 : 255),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.workspace_premium_rounded,
-                    color: isActive ? AppTheme.accentGold : Colors.white,
-                    size: 28,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        isActive ? 'Premium Access Active' : 'Go Premium Today',
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: isActive
-                              ? (isDark ? Colors.white : Colors.black87)
-                              : Colors.white,
-                        ),
-                      ),
-                      Text(
-                        isActive
-                            ? 'Valid until ${DateFormat.yMMMd().format(sub.expiresAt)}'
-                            : 'Unlock all past questions & solutions',
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          color: isActive
-                              ? (isDark ? Colors.white60 : Colors.black54)
-                              : Colors.white70,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => context.push('/paywall'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.accentGold,
-                foregroundColor: Colors.black87,
-                elevation: 0,
-                minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
-              ),
-              child: Text(
-                isActive ? 'Renew Subscription' : 'Upgrade – ₵1 / Sem',
-                style: GoogleFonts.playfairDisplay(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _QuickStatsRow extends StatelessWidget {
-  final bool isDark;
-  final Map<String, String> stats;
-
-  const _QuickStatsRow({required this.isDark, required this.stats});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-            child: _StatCard(
-                label: 'Viewed',
-                value: stats['viewed'] ?? '0',
-                icon: Icons.visibility_outlined,
-                isDark: isDark)),
-        const SizedBox(width: 12),
-        Expanded(
-            child: _StatCard(
-                label: 'Stored',
-                value: stats['stored'] ?? '0',
-                icon: Icons.check_circle_outline_rounded,
-                isDark: isDark)),
-        const SizedBox(width: 12),
-        Expanded(
-            child: _StatCard(
-                label: 'Streaks',
-                value: stats['streaks'] ?? '0d',
-                icon: Icons.local_fire_department_outlined,
-                isDark: isDark)),
-      ],
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final bool isDark;
-
-  const _StatCard(
-      {required this.label,
-      required this.value,
-      required this.icon,
-      required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
+    
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E293B) : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-            color: isDark ? Colors.white10 : Colors.black.withAlpha(10)),
+        color: isActive ? GMTheme.card.withAlpha(180) : GMTheme.accent.withAlpha(20),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: isActive ? GMTheme.divider : GMTheme.accent.withAlpha(50)),
+        boxShadow: isActive ? [] : [BoxShadow(color: GMTheme.accent.withAlpha(20), blurRadius: 20)],
       ),
       child: Column(
         children: [
-          Icon(icon, size: 20, color: AppTheme.primaryTeal),
-          const SizedBox(height: 8),
-          Text(value,
-              style: GoogleFonts.playfairDisplay(
-                  fontSize: 18, fontWeight: FontWeight.bold)),
-          Text(label,
-              style: GoogleFonts.inter(
-                  fontSize: 11,
-                  color: isDark ? Colors.white38 : Colors.black38)),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isActive ? GMTheme.accent.withAlpha(20) : GMTheme.accent.withAlpha(40),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: GMTheme.accent.withAlpha(isActive ? 60 : 100)),
+                ),
+                child: const Icon(
+                  Icons.workspace_premium_rounded,
+                  color: GMTheme.accent,
+                  size: 32,
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isActive ? 'UniPast Premium Access' : 'Ascend to UniPast Premium',
+                      style: GoogleFonts.orbitron(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: GMTheme.text,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      isActive
+                          ? 'Active until ${DateFormat.yMMMd().format(sub.expiresAt)}'
+                          : 'Unlock all past questions & AI solutions',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: isActive ? GMTheme.primary : GMTheme.textMuted,
+                        fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: () => context.push('/paywall'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: GMTheme.accent.withAlpha(isActive ? 20 : 100),
+              foregroundColor: GMTheme.accent,
+              elevation: 0,
+              side: BorderSide(color: GMTheme.accent.withAlpha(60)),
+              minimumSize: const Size(double.infinity, 56),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+            child: Text(
+              isActive ? 'Renew Alignment' : 'Upgrade – ₵1 / Sem',
+              style: GoogleFonts.orbitron(fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.5, color: isActive ? GMTheme.accent : Colors.black87),
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  final String title;
-  final bool isDark;
-  const _SectionHeader({required this.title, required this.isDark});
+class _QuickStatsRow extends StatelessWidget {
+  final Map<String, String> stats;
+
+  const _QuickStatsRow({required this.stats});
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: GoogleFonts.playfairDisplay(
-        fontSize: 14,
-        fontWeight: FontWeight.bold,
-        color: isDark ? Colors.white70 : Colors.black87,
-        letterSpacing: 0.5,
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+      decoration: GMTheme.glassBox,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _GodMindStatCard(label: 'Viewed', value: stats['viewed'] ?? '0', icon: Icons.visibility_rounded, color: GMTheme.primary),
+          _GodMindStatDivider(),
+          _GodMindStatCard(label: 'Stored', value: stats['stored'] ?? '0', icon: Icons.save_rounded, color: GMTheme.secondary),
+          _GodMindStatDivider(),
+          _GodMindStatCard(label: 'Streaks', value: stats['streaks'] ?? '0d', icon: Icons.local_fire_department_rounded, color: GMTheme.accent),
+        ],
       ),
     );
   }
 }
 
-class _SettingsCard extends StatelessWidget {
-  final List<Widget> children;
-  final bool isDark;
+class _GodMindStatCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
 
-  const _SettingsCard({required this.children, required this.isDark});
+  const _GodMindStatCard({required this.label, required this.value, required this.icon, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(icon, size: 24, color: color),
+        const SizedBox(height: 12),
+        Text(value, style: GoogleFonts.orbitron(fontSize: 20, fontWeight: FontWeight.bold, color: GMTheme.text)),
+        const SizedBox(height: 4),
+        Text(label, style: GoogleFonts.inter(fontSize: 11, color: GMTheme.textMuted, fontWeight: FontWeight.bold, letterSpacing: 1)),
+      ],
+    );
+  }
+}
+
+class _GodMindStatDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 1,
+      height: 40,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.transparent, GMTheme.divider, Colors.transparent],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String title;
+  const _SectionTitle({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title.toUpperCase(),
+      style: GoogleFonts.orbitron(
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+        color: GMTheme.textMuted,
+        letterSpacing: 2,
+      ),
+    );
+  }
+}
+
+class _GodMindSettingsCard extends StatelessWidget {
+  final List<Widget> children;
+
+  const _GodMindSettingsCard({required this.children});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E293B) : Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-            color: isDark ? Colors.white10 : Colors.black.withAlpha(5)),
-      ),
+      decoration: GMTheme.glassBox,
       child: Column(children: children),
     );
   }
 }
 
-class _SettingsTile extends StatelessWidget {
+class _GodMindSettingsTile extends StatelessWidget {
   final IconData icon;
+  final Color iconColor;
   final String title;
   final String? subtitle;
   final Widget? trailing;
   final VoidCallback? onTap;
+  final bool showArrow;
 
-  const _SettingsTile({
+  const _GodMindSettingsTile({
     required this.icon,
+    required this.iconColor,
     required this.title,
     this.subtitle,
     this.trailing,
     this.onTap,
+    this.showArrow = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       leading: Container(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: AppTheme.primaryTeal.withAlpha(20),
-          borderRadius: BorderRadius.circular(10),
+          color: iconColor.withAlpha(20),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: iconColor.withAlpha(40)),
         ),
-        child: Icon(icon, size: 22, color: AppTheme.primaryTeal),
+        child: Icon(icon, size: 22, color: iconColor),
       ),
       title: Text(
         title,
         style: GoogleFonts.inter(
           fontSize: 15,
           fontWeight: FontWeight.w600,
-          color: isDark ? Colors.white : Colors.black87,
+          color: GMTheme.text,
         ),
       ),
       subtitle: subtitle != null
-          ? Text(subtitle!,
-              style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: isDark ? Colors.white38 : Colors.black38))
+          ? Padding(
+              padding: const EdgeInsets.only(top: 4.0),
+              child: Text(subtitle!, style: GoogleFonts.inter(fontSize: 12, color: GMTheme.textMuted)),
+            )
           : null,
-      trailing: trailing ??
-          Icon(Icons.chevron_right_rounded,
-              size: 20, color: isDark ? Colors.white12 : Colors.black12),
+      trailing: trailing ?? (showArrow ? const Icon(Icons.chevron_right_rounded, size: 20, color: GMTheme.textMuted) : null),
       onTap: onTap,
     );
   }
 }
 
-class _ShimmerCard extends StatelessWidget {
-  const _ShimmerCard();
+class _GodMindShimmerCard extends StatelessWidget {
+  const _GodMindShimmerCard();
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Shimmer.fromColors(
-      baseColor: isDark ? Colors.white10 : Colors.black.withAlpha(10),
-      highlightColor: isDark ? Colors.white24 : Colors.black.withAlpha(5),
+      baseColor: GMTheme.card,
+      highlightColor: GMTheme.surface,
       child: Container(
-        height: 150,
+        height: 120,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          color: GMTheme.card,
+          borderRadius: BorderRadius.circular(24),
         ),
       ),
     );

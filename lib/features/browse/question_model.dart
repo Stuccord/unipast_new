@@ -1,6 +1,7 @@
 class PastQuestion {
   final String id;
   final String courseId;
+  final String? title;
   final int year;
   final int semester;
   final String pdfUrl;
@@ -10,6 +11,7 @@ class PastQuestion {
   PastQuestion({
     required this.id,
     required this.courseId,
+    this.title,
     required this.year,
     required this.semester,
     required this.pdfUrl,
@@ -21,6 +23,7 @@ class PastQuestion {
     return PastQuestion(
       id: json['id'],
       courseId: json['course_id'],
+      title: json['title'],
       year: json['year'],
       semester: json['semester'],
       pdfUrl: json['pdf_url'] ?? json['file_path'] ?? '',

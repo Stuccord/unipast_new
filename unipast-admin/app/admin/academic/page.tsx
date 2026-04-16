@@ -4,7 +4,11 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { addAcademicItem, updateAcademicItem, deleteAcademicItem, bulkAddCourses, bulkAddProgrammes } from './actions'
-import { Plus, Pencil, Trash2, Search, Building2, MoreVertical, MapPin, X, GraduationCap, BookOpen, Filter, Loader2, ListPlus } from 'lucide-react'
+import { 
+    Plus, Pencil, Trash2, Search, Building2, MoreVertical, 
+    X, GraduationCap, BookOpen, Filter, Loader2, ListPlus, 
+    Database, Cpu, Globe, Zap, Shield, LayoutGrid 
+} from 'lucide-react'
 
 type University = {
     id: string
@@ -269,32 +273,44 @@ export default function AcademicPage() {
         }
     }
 
+    const getTabTitle = () => {
+        switch(activeTab) {
+            case 'university': return 'Institutional Nodes';
+            case 'faculty': return 'Faculty Sectors';
+            case 'programme': return 'Programme Arrays';
+            case 'course': return 'Course Core Units';
+            default: return 'Core Setup';
+        }
+    }
+
     return (
-        <div className="space-y-10">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                <div className="space-y-1">
-                    <h2 className="text-3xl font-black text-slate-800 tracking-tight">
-                        {activeTab === 'university' ? 'Manage Universities' : 
-                         activeTab === 'faculty' ? 'Manage Faculties' : 
-                         activeTab === 'programme' ? 'Manage Programmes' : 
-                         'Manage Courses'}
-                    </h2>
-                    <p className="text-slate-500 font-medium tracking-tight">Manage the academic hierarchy of institutions, faculties, and courses.</p>
+        <div className="space-y-12 font-orbitron pb-32">
+            <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
+                <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-accent/10 rounded-xl border border-accent/20">
+                            <Globe size={22} className="text-accent" />
+                        </div>
+                        <span className="text-[10px] font-black text-accent uppercase tracking-[0.4em]">Structure Architecture v9.2</span>
+                    </div>
+                    <h2 className="text-4xl font-black text-white tracking-tight uppercase">{getTabTitle()}</h2>
+                    <p className="text-white/30 font-black text-[10px] uppercase tracking-[0.3em]">Configure the Global Academic Hierarchy of the UniPast Web</p>
                 </div>
+                
                 <button
                     onClick={() => {
                         setModalType(activeTab)
                         setShowModal(true)
                     }}
-                    className="bg-[#0D9488] hover:bg-teal-700 text-white font-bold py-4 px-8 rounded-2xl flex items-center space-x-3 transition-all shadow-xl shadow-teal-700/20"
+                    className="relative px-10 py-5 rounded-[1.5rem] bg-primary text-card font-black text-xs uppercase tracking-[0.3em] overflow-hidden group/btn shadow-[0_0_30px_rgba(0,255,204,0.2)] hover:shadow-primary/40 transition-all duration-500 flex items-center gap-3"
                 >
-                    <Plus size={20} />
-                    <span>Add {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</span>
+                    <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700 skew-x-12" />
+                    <Plus size={20} className="relative z-10" />
+                    <span className="relative z-10">Deploy New {activeTab}</span>
                 </button>
             </div>
 
-            {/* Tabs */}
-            <div className="flex space-x-2 p-1 bg-slate-100 rounded-[1.5rem] w-fit overflow-x-auto max-w-full">
+            <div className="flex flex-wrap gap-4 p-1.5 bg-card/20 backdrop-blur-3xl rounded-[2rem] border border-white/5 w-fit">
                 {(['university', 'faculty', 'programme', 'course'] as ActiveTab[]).map(tab => (
                     <button
                         key={tab}
@@ -302,10 +318,10 @@ export default function AcademicPage() {
                             setActiveTab(tab)
                             setSearchTerm('')
                         }}
-                        className={`px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all whitespace-nowrap ${
+                        className={`px-10 py-4 rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.3em] transition-all duration-500 relative ${
                             activeTab === tab 
-                                ? 'bg-white text-[#0D9488] shadow-sm' 
-                                : 'text-slate-400 hover:text-slate-600'
+                                ? 'bg-primary text-card shadow-lg' 
+                                : 'text-white/30 hover:text-white hover:bg-white/5'
                         }`}
                     >
                         {tab}s
@@ -313,16 +329,18 @@ export default function AcademicPage() {
                 ))}
             </div>
 
-            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
-                <div className="p-8 bg-slate-50/50 border-b border-slate-100/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="relative max-w-md w-full">
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            <div className="bg-card/20 backdrop-blur-3xl rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl animate-in fade-in duration-1000">
+                <div className="p-10 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="relative max-w-lg w-full group">
+                        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors">
+                            <Search size={22} />
+                        </div>
                         <input
                             type="text"
-                            placeholder={`Search ${activeTab}s...`}
+                            placeholder={`SCAN ${activeTab.toUpperCase()} ARCHIVES...`}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-14 pr-6 py-4 rounded-2xl bg-white border-none outline-none focus:ring-2 focus:ring-[#0D9488]/20 transition-all font-medium text-slate-700 shadow-sm"
+                            className="w-full pl-16 pr-8 py-5 rounded-2xl bg-white/5 border border-white/5 outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/20 transition-all font-black text-[10px] text-white tracking-[0.2em] placeholder:text-white/10 uppercase"
                         />
                     </div>
                 </div>
@@ -330,77 +348,88 @@ export default function AcademicPage() {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="text-slate-400 font-black text-xs uppercase tracking-[0.2em]">
-                                <th className="px-10 py-6">{activeTab === 'university' ? 'Institution' : activeTab === 'faculty' ? 'Faculty' : activeTab === 'programme' ? 'Programme' : 'Course'}</th>
-                                <th className="px-10 py-6">{activeTab === 'university' ? 'Category' : 'Affiliation'}</th>
-                                <th className="px-10 py-6">Status</th>
-                                <th className="px-10 py-6 text-right">Actions</th>
+                            <tr className="bg-white/[0.02] border-white/5">
+                                <th className="px-10 py-8 text-[9px] font-black text-white/30 uppercase tracking-[0.4em]">{activeTab.toUpperCase()} IDENTIFIER</th>
+                                <th className="px-10 py-8 text-[9px] font-black text-white/30 uppercase tracking-[0.4em]">AFFILIATION SECTOR</th>
+                                <th className="px-10 py-8 text-[9px] font-black text-white/30 uppercase tracking-[0.4em]">CONNECTIVITY</th>
+                                <th className="px-10 py-8 text-[9px] font-black text-white/30 uppercase tracking-[0.4em] text-right">SYSTEM OPS</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100">
+                        <tbody className="divide-y divide-white/5">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={4} className="px-10 py-24 text-center">
-                                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0D9488] mx-auto"></div>
+                                    <td colSpan={4} className="px-10 py-40 text-center">
+                                         <div className="relative w-24 h-24 mx-auto animate-spin">
+                                            <div className="absolute inset-0 border-4 border-primary/20 rounded-full" />
+                                            <div className="absolute inset-0 border-4 border-primary rounded-full border-t-transparent shadow-[0_0_20px_#00FFCC]" />
+                                         </div>
                                     </td>
                                 </tr>
                             ) : filteredData().length === 0 ? (
                                 <tr>
-                                    <td colSpan={4} className="px-10 py-24 text-center text-slate-400 font-bold tracking-widest uppercase text-xs">No {activeTab}s found</td>
+                                    <td colSpan={4} className="px-10 py-40 text-center text-white/10 font-black tracking-[0.8em] uppercase text-sm">ARCHIVE PORTAL EMPTY</td>
                                 </tr>
                             ) : (
                                 filteredData().map((item: any) => (
-                                    <tr key={item.id} className="hover:bg-slate-50/50 transition duration-150 group">
+                                    <tr key={item.id} className="hover:bg-white/[0.03] transition-colors duration-500 group">
                                         <td className="px-10 py-8">
-                                            <div className="flex items-center space-x-4">
-                                                <div className="h-14 w-14 rounded-2xl bg-[#0D9488]/5 flex items-center justify-center text-[#0D9488] border-2 border-white shadow-sm group-hover:scale-110 transition-transform duration-300">
-                                                    {activeTab === 'university' && <Building2 size={24} />}
-                                                    {activeTab === 'faculty' && <GraduationCap size={24} />}
-                                                    {activeTab === 'programme' && <BookOpen size={24} />}
-                                                    {activeTab === 'course' && <BookOpen size={24} />}
+                                            <div className="flex items-center gap-6">
+                                                <div className="h-16 w-16 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-white/20 group-hover:text-primary group-hover:border-primary/40 transition-all duration-700">
+                                                    {activeTab === 'university' && <Building2 size={28} />}
+                                                    {activeTab === 'faculty' && <GraduationCap size={28} />}
+                                                    {activeTab === 'programme' && <LayoutGrid size={28} />}
+                                                    {activeTab === 'course' && <BookOpen size={28} />}
                                                 </div>
-                                                <div>
-                                                    <span className="font-black text-slate-800 text-lg tracking-tight">{item.name || item.title}</span>
-                                                    {item.code && <p className="text-xs text-slate-400 font-bold">{item.code} • Lvl {item.level} • Sem {item.semester}</p>}
+                                                <div className="flex flex-col space-y-1 min-w-0 flex-1">
+                                                    <span className="font-black text-white text-sm tracking-widest uppercase group-hover:text-primary transition-colors duration-500 truncate">{item.name || item.title}</span>
+                                                    {item.code && (
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="px-2 py-0.5 bg-primary/10 rounded text-primary text-[8px] font-black border border-primary/20 shrink-0">{item.code}</div>
+                                                            <span className="text-[10px] text-white/20 font-black tracking-widest uppercase truncate">L{item.level} Cycle {item.semester}</span>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-10 py-8">
                                             {activeTab === 'university' ? (
-                                                <div className="flex items-center space-x-2 text-slate-500 font-bold text-sm">
-                                                    <span>{item.category || 'N/A'}</span>
+                                                <div className="px-4 py-2 bg-secondary/10 border border-secondary/20 rounded-xl w-fit">
+                                                    <span className="text-secondary text-[10px] font-black uppercase tracking-widest">{item.category || 'GENERIC'}</span>
                                                 </div>
                                             ) : (
-                                                <div className="flex flex-col">
-                                                    <span className="text-slate-700 font-black text-sm">{activeTab === 'faculty' ? item.university_name : activeTab === 'programme' ? item.faculty_name : item.programme_name}</span>
-                                                    {item.university_name && (activeTab === 'course' || activeTab === 'programme') && <span className="text-xs text-slate-400 font-bold">{item.university_name}</span>}
+                                                <div className="flex flex-col space-y-1 min-w-0">
+                                                    <span className="text-white/60 font-black text-[11px] uppercase tracking-widest truncate">{activeTab === 'faculty' ? item.university_name : activeTab === 'programme' ? item.faculty_name : item.programme_name}</span>
+                                                    {item.university_name && (activeTab === 'course' || activeTab === 'programme') && <span className="text-[9px] text-white/20 font-black uppercase tracking-[0.2em] truncate">{item.university_name}</span>}
                                                 </div>
                                             )}
                                         </td>
                                         <td className="px-10 py-8">
-                                            <span className="px-4 py-2 rounded-xl bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest border border-emerald-100">Live</span>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_#00FFCC]" />
+                                                <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.3em]">Operational</span>
+                                            </div>
                                         </td>
                                         <td className="px-10 py-8 text-right">
-                                            <div className="flex items-center justify-end space-x-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="flex items-center justify-end gap-4 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-4 group-hover:translate-x-0">
                                                 <button 
                                                     onClick={() => {
                                                         setEditingItem(item)
                                                         setModalType(activeTab)
                                                         setShowModal(true)
                                                     }}
-                                                    className="p-3 bg-slate-50 text-slate-400 hover:text-[#0D9488] hover:bg-[#0D9488]/10 rounded-xl transition-all"
+                                                    className="h-12 w-12 bg-white/5 text-white/30 hover:text-primary hover:bg-primary/10 border border-white/5 hover:border-primary/40 rounded-2xl transition-all flex items-center justify-center group/opt"
                                                 >
-                                                    <Pencil size={18} />
+                                                    <Pencil size={20} className="group-hover/opt:scale-110 transition-transform" />
                                                 </button>
                                                 <button 
                                                     onClick={() => handleDelete(item.id, activeTab === 'university' ? 'universities' : activeTab === 'faculty' ? 'faculties' : activeTab === 'programme' ? 'programmes' : 'courses')}
-                                                    className="p-3 bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+                                                    className="h-12 w-12 bg-white/5 text-white/30 hover:text-danger hover:bg-danger/10 border border-white/5 hover:border-danger/40 rounded-2xl transition-all flex items-center justify-center group/opt"
                                                 >
-                                                    <Trash2 size={18} />
+                                                    <Trash2 size={20} className="group-hover/opt:scale-110 transition-transform" />
                                                 </button>
                                             </div>
-                                            <div className="group-hover:hidden text-slate-300">
-                                                <MoreVertical size={20} />
+                                            <div className="group-hover:hidden text-white/10">
+                                                <MoreVertical size={22} />
                                             </div>
                                         </td>
                                     </tr>
@@ -413,258 +442,265 @@ export default function AcademicPage() {
 
             {/* Implementation Modal */}
             {showModal && (
-                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-6 z-50 animate-in fade-in duration-300">
-                    <div className="bg-white rounded-[2.5rem] max-w-lg w-full shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-                        <div className="bg-[#0D9488] p-10 text-white relative">
-                            <button 
-                                onClick={() => {
-                                    setShowModal(false)
-                                    setEditingItem(null)
-                                }}
-                                className="absolute top-8 right-8 text-white/50 hover:text-white transition-colors"
-                            >
-                                <X size={24} />
-                            </button>
-                            <h3 className="text-3xl font-black tracking-tight">{editingItem ? 'Edit' : 'Add'} {modalType}</h3>
-                            <p className="text-teal-100 font-medium mt-2">{editingItem ? 'Modify existing' : 'Registers a new'} academic unit in the system.</p>
-                        </div>
-                        <form onSubmit={editingItem ? handleEdit : handleAdd} className="p-10 space-y-8">
-                            {modalType === 'university' && (
-                                <>
-                                    <div className="space-y-3">
-                                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest px-1">University Name</label>
-                                        <input
-                                            type="text" required placeholder="e.g. University of Ghana"
-                                            className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#0D9488]/20 font-bold text-slate-700"
-                                            value={editingItem ? editingItem.name : newUni.name}
-                                            onChange={e => editingItem ? setEditingItem({...editingItem, name: e.target.value}) : setNewUni({ ...newUni, name: e.target.value })}
-                                        />
+                <div className="fixed inset-0 bg-bg/80 backdrop-blur-2xl flex items-center justify-center p-6 z-[200] animate-in fade-in duration-500">
+                    <div className="bg-card border border-white/5 rounded-[3rem] max-w-2xl w-full shadow-[0_0_100px_rgba(0,0,0,0.5)] overflow-hidden animate-in zoom-in-95 duration-500 relative">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-primary" />
+                        <div className="p-12 md:p-16 space-y-12">
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <Shield size={16} className="text-primary" />
+                                        <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Node Configuration</span>
                                     </div>
-                                    <div className="space-y-3">
-                                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest px-1">Category</label>
-                                        <select
-                                            required
-                                            className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#0D9488]/20 font-bold text-slate-700 appearance-none"
-                                            value={editingItem ? editingItem.category : newUni.category}
-                                            onChange={e => editingItem ? setEditingItem({...editingItem, category: e.target.value}) : setNewUni({ ...newUni, category: e.target.value })}
-                                        >
-                                            <option value="Public">Public</option>
-                                            <option value="Private">Private</option>
-                                            <option value="Technical">Technical</option>
-                                            <option value="College">College</option>
-                                        </select>
-                                    </div>
-
-                                </>
-                            )}
-
-                            {modalType === 'faculty' && (
-                                <>
-                                    <div className="space-y-3">
-                                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest px-1">Faculty Name</label>
-                                        <input
-                                            type="text" required placeholder="e.g. Faculty of Social Sciences"
-                                            className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#0D9488]/20 font-bold text-slate-700"
-                                            value={editingItem ? editingItem.name : newFaculty.name}
-                                            onChange={e => editingItem ? setEditingItem({...editingItem, name: e.target.value}) : setNewFaculty({ ...newFaculty, name: e.target.value })}
-                                        />
-                                    </div>
-                                    <div className="space-y-3">
-                                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest px-1">Parent University</label>
-                                        <select
-                                            required
-                                            className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#0D9488]/20 font-bold text-slate-700 appearance-none"
-                                            value={editingItem ? editingItem.university_id : newFaculty.university_id}
-                                            onChange={e => editingItem ? setEditingItem({...editingItem, university_id: e.target.value}) : setNewFaculty({ ...newFaculty, university_id: e.target.value })}
-                                        >
-                                            <option value="">Select University</option>
-                                            {unis.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-                                        </select>
-                                    </div>
-                                </>
-                            )}
-                            {modalType === 'programme' && (
-                                <>
-                                    {!editingItem && (
-                                        <div className="flex justify-end -mb-4">
-                                            <button
-                                                type="button"
-                                                onClick={() => setIsBulkEntry(!isBulkEntry)}
-                                                className="flex items-center space-x-2 text-xs font-bold text-[#0D9488] hover:bg-teal-50 px-3 py-2 rounded-xl transition-all"
-                                            >
-                                                <ListPlus size={16} />
-                                                <span>{isBulkEntry ? 'Switch to Single Entry' : 'Switch to Bulk Add'}</span>
-                                            </button>
-                                        </div>
-                                    )}
-
-                                    {!isBulkEntry ? (
-                                        <div className="space-y-3">
-                                            <label className="text-xs font-black text-slate-400 uppercase tracking-widest px-1">Programme Name</label>
-                                            <input
-                                                type="text" required placeholder="e.g. BSc. Computer Science"
-                                                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#0D9488]/20 font-bold text-slate-700"
-                                                value={editingItem ? editingItem.name : newProgramme.name}
-                                                onChange={e => editingItem ? setEditingItem({...editingItem, name: e.target.value}) : setNewProgramme({ ...newProgramme, name: e.target.value })}
-                                            />
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-3">
-                                            <label className="text-xs font-black text-slate-400 uppercase tracking-widest px-1">Programmes (One per line)</label>
-                                            <textarea
-                                                required
-                                                placeholder="BSc. Computer Science&#10;BSc. Information Technology&#10;BEng. Electrical Engineering"
-                                                className="w-full h-48 px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#0D9488]/20 font-bold text-slate-700 resize-none"
-                                                value={bulkText}
-                                                onChange={e => setBulkText(e.target.value)}
-                                            />
-                                            <p className="text-[10px] text-slate-400 px-2 font-medium">Enter multiple programme names, one on each line.</p>
-                                        </div>
-                                    )}
-
-                                    {!editingItem && (
-                                        <div className="space-y-3">
-                                            <label className="text-xs font-black text-slate-400 uppercase tracking-widest px-1">Duration (Years)</label>
-                                            <input
-                                                type="number" required min={1} max={7}
-                                                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#0D9488]/20 font-bold text-slate-700"
-                                                value={newProgramme.duration_years}
-                                                onChange={e => setNewProgramme({ ...newProgramme, duration_years: parseInt(e.target.value) })}
-                                            />
-                                        </div>
-                                    )}
-                                    <div className="space-y-3">
-                                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest px-1">Parent Faculty</label>
-                                        <select
-                                            required
-                                            className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#0D9488]/20 font-bold text-slate-700 appearance-none"
-                                            value={editingItem ? editingItem.faculty_id : newProgramme.faculty_id}
-                                            onChange={e => editingItem ? setEditingItem({...editingItem, faculty_id: e.target.value}) : setNewProgramme({ ...newProgramme, faculty_id: e.target.value })}
-                                        >
-                                            <option value="">Select Faculty</option>
-                                            {faculties.map(f => <option key={f.id} value={f.id}>{f.name} ({f.university_name})</option>)}
-                                        </select>
-                                    </div>
-                                </>
-                            )}
-
-                            {modalType === 'course' && (
-                                <>
-                                    {!editingItem && (
-                                        <div className="flex justify-end -mb-4">
-                                            <button
-                                                type="button"
-                                                onClick={() => setIsBulkEntry(!isBulkEntry)}
-                                                className="flex items-center space-x-2 text-xs font-bold text-[#0D9488] hover:bg-teal-50 px-3 py-2 rounded-xl transition-all"
-                                            >
-                                                <ListPlus size={16} />
-                                                <span>{isBulkEntry ? 'Switch to Single Entry' : 'Switch to Bulk Add'}</span>
-                                            </button>
-                                        </div>
-                                    )}
-
-                                    {!isBulkEntry ? (
-                                        <>
-                                            <div className="space-y-3">
-                                                <label className="text-xs font-black text-slate-400 uppercase tracking-widest px-1">Course Code</label>
-                                                <input
-                                                    type="text" required placeholder="e.g. CS101"
-                                                    className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#0D9488]/20 font-bold text-slate-700"
-                                                    value={editingItem ? editingItem.code : newCourse.code}
-                                                    onChange={e => editingItem ? setEditingItem({...editingItem, code: e.target.value}) : setNewCourse({ ...newCourse, code: e.target.value })}
-                                                />
-                                            </div>
-                                            <div className="space-y-3">
-                                                <label className="text-xs font-black text-slate-400 uppercase tracking-widest px-1">Course Title</label>
-                                                <input
-                                                    type="text" required placeholder="e.g. Data Structures"
-                                                    className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#0D9488]/20 font-bold text-slate-700"
-                                                    value={editingItem ? editingItem.title : newCourse.title}
-                                                    onChange={e => editingItem ? setEditingItem({...editingItem, title: e.target.value}) : setNewCourse({ ...newCourse, title: e.target.value })}
-                                                />
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <div className="space-y-3">
-                                            <label className="text-xs font-black text-slate-400 uppercase tracking-widest px-1">Bulk Courses (Code - Title)</label>
-                                            <textarea
-                                                required
-                                                rows={5}
-                                                placeholder={`CS101 - Intro to Programming\nCS102 - Data Structures\nMATH101 - Calculus I`}
-                                                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#0D9488]/20 font-bold text-slate-700 resize-none h-40"
-                                                value={bulkText}
-                                                onChange={e => setBulkText(e.target.value)}
-                                            />
-                                        </div>
-                                    )}
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-3">
-                                            <label className="text-xs font-black text-slate-400 uppercase tracking-widest px-1">Level</label>
-                                            <select
-                                                required
-                                                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#0D9488]/20 font-bold text-slate-700 appearance-none"
-                                                value={editingItem ? editingItem.level : newCourse.level}
-                                                onChange={e => editingItem ? setEditingItem({...editingItem, level: parseInt(e.target.value)}) : setNewCourse({ ...newCourse, level: parseInt(e.target.value) })}
-                                            >
-                                                <option value={100}>100 (Level 1)</option>
-                                                <option value={200}>200 (Level 2)</option>
-                                                <option value={300}>300 (Level 3)</option>
-                                                <option value={400}>400 (Level 4)</option>
-                                                <option value={500}>500 (Level 5)</option>
-                                                <option value={600}>600 (Level 6)</option>
-                                            </select>
-                                        </div>
-                                        <div className="space-y-3">
-                                            <label className="text-xs font-black text-slate-400 uppercase tracking-widest px-1">Semester</label>
-                                            <select
-                                                required
-                                                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#0D9488]/20 font-bold text-slate-700 appearance-none"
-                                                value={editingItem ? editingItem.semester : newCourse.semester}
-                                                onChange={e => editingItem ? setEditingItem({...editingItem, semester: parseInt(e.target.value)}) : setNewCourse({ ...newCourse, semester: parseInt(e.target.value) })}
-                                            >
-                                                <option value={1}>Semester 1</option>
-                                                <option value={2}>Semester 2</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest px-1">Parent Programme</label>
-                                        <select
-                                            required
-                                            className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#0D9488]/20 font-bold text-slate-700 appearance-none"
-                                            value={editingItem ? editingItem.programme_id : newCourse.programme_id}
-                                            onChange={e => editingItem ? setEditingItem({...editingItem, programme_id: e.target.value}) : setNewCourse({ ...newCourse, programme_id: e.target.value })}
-                                        >
-                                            <option value="">Select Programme</option>
-                                            {programmes.map(p => <option key={p.id} value={p.id}>{p.name} ({p.university_name})</option>)}
-                                        </select>
-                                    </div>
-                                </>
-                            )}
-
-                            <div className="flex space-x-4 pt-4">
+                                    <h3 className="text-4xl font-black text-white tracking-tight uppercase">{editingItem ? 'Reconfigure' : 'Initialize'} {modalType}</h3>
+                                </div>
                                 <button 
-                                    type="button" 
                                     onClick={() => {
                                         setShowModal(false)
                                         setEditingItem(null)
-                                    }} 
-                                    className="flex-1 px-8 py-5 border-2 border-slate-100 text-slate-400 font-black rounded-2xl hover:bg-slate-50 transition-colors"
+                                    }}
+                                    className="h-14 w-14 bg-white/5 hover:bg-white/10 text-white/20 hover:text-white rounded-2xl border border-white/5 transition-all flex items-center justify-center"
                                 >
-                                    Cancel
-                                </button>
-                                <button 
-                                    type="submit" 
-                                    disabled={saving}
-                                    className="flex-1 bg-[#0D9488] text-white font-black rounded-2xl py-5 hover:bg-teal-700 transition-all shadow-lg shadow-teal-700/20 disabled:opacity-50 flex items-center justify-center space-x-2"
-                                >
-                                    {saving && <Loader2 className="animate-spin" size={20} />}
-                                    <span>{saving ? (editingItem ? 'Updating...' : 'Saving...') : (editingItem ? 'Update' : 'Save')}</span>
+                                    <X size={28} />
                                 </button>
                             </div>
-                        </form>
+
+                            <form onSubmit={editingItem ? handleEdit : handleAdd} className="space-y-10">
+                                {modalType === 'university' && (
+                                    <div className="space-y-8">
+                                        <div className="space-y-4">
+                                            <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] px-2">Institution Identity</label>
+                                            <input
+                                                type="text" required placeholder="IDENTIFIER NAME..."
+                                                className="w-full px-8 py-6 bg-white/5 border border-white/5 rounded-2xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/30 font-black text-xs text-white tracking-widest uppercase placeholder:text-white/5"
+                                                value={editingItem ? editingItem.name : newUni.name}
+                                                onChange={e => editingItem ? setEditingItem({...editingItem, name: e.target.value}) : setNewUni({ ...newUni, name: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className="space-y-4">
+                                            <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] px-2">Classification</label>
+                                            <select
+                                                required
+                                                className="w-full px-8 py-6 bg-white/5 border border-white/5 rounded-2xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/30 font-black text-xs text-white/60 tracking-widest uppercase appearance-none"
+                                                value={editingItem ? editingItem.category : newUni.category}
+                                                onChange={e => editingItem ? setEditingItem({...editingItem, category: e.target.value}) : setNewUni({ ...newUni, category: e.target.value })}
+                                            >
+                                                <option value="Public" className="bg-bg">PUBLIC SECTOR</option>
+                                                <option value="Private" className="bg-bg">PRIVATE SECTOR</option>
+                                                <option value="Technical" className="bg-bg">TECHNICAL SECTOR</option>
+                                                <option value="College" className="bg-bg">COLLEGE SECTOR</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {modalType === 'faculty' && (
+                                    <div className="space-y-8">
+                                        <div className="space-y-4">
+                                            <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] px-2">Faculty Identification</label>
+                                            <input
+                                                type="text" required placeholder="SECTOR NAME..."
+                                                className="w-full px-8 py-6 bg-white/5 border border-white/5 rounded-2xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/30 font-black text-xs text-white tracking-widest uppercase placeholder:text-white/5"
+                                                value={editingItem ? editingItem.name : newFaculty.name}
+                                                onChange={e => editingItem ? setEditingItem({...editingItem, name: e.target.value}) : setNewFaculty({ ...newFaculty, name: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className="space-y-4">
+                                            <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] px-2">Primary Node Affiliation</label>
+                                            <select
+                                                required
+                                                className="w-full px-8 py-6 bg-white/5 border border-white/5 rounded-2xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/30 font-black text-xs text-white/60 tracking-widest uppercase appearance-none"
+                                                value={editingItem ? editingItem.university_id : newFaculty.university_id}
+                                                onChange={e => editingItem ? setEditingItem({...editingItem, university_id: e.target.value}) : setNewFaculty({ ...newFaculty, university_id: e.target.value })}
+                                            >
+                                                <option value="" className="bg-bg">SELECT TARGET NODE</option>
+                                                {unis.map(u => <option key={u.id} value={u.id} className="bg-bg">{u.name}</option>)}
+                                            </select>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {modalType === 'programme' && (
+                                    <div className="space-y-8">
+                                        {!editingItem && (
+                                            <div className="flex justify-end">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsBulkEntry(!isBulkEntry)}
+                                                    className="px-5 py-2 rounded-xl bg-white/5 border border-white/10 text-[9px] font-black text-primary uppercase tracking-[0.2em] hover:bg-primary/10 transition-colors flex items-center gap-2"
+                                                >
+                                                    <ListPlus size={14} />
+                                                    {isBulkEntry ? 'Standard Entry' : 'Bulk Uplink'}
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {!isBulkEntry ? (
+                                            <div className="space-y-4">
+                                                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] px-2">Programme Signature</label>
+                                                <input
+                                                    type="text" required placeholder="ARRAY NAME..."
+                                                    className="w-full px-8 py-6 bg-white/5 border border-white/5 rounded-2xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/30 font-black text-xs text-white tracking-widest uppercase placeholder:text-white/5"
+                                                    value={editingItem ? editingItem.name : newProgramme.name}
+                                                    onChange={e => editingItem ? setEditingItem({...editingItem, name: e.target.value}) : setNewProgramme({ ...newProgramme, name: e.target.value })}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-4">
+                                                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] px-2">Batch Metadata (One per line)</label>
+                                                <textarea
+                                                    required
+                                                    placeholder="NAME_1&#10;NAME_2&#10;NAME_3..."
+                                                    className="w-full h-48 px-8 py-6 bg-white/5 border border-white/5 rounded-2xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/30 font-black text-xs text-white tracking-widest uppercase placeholder:text-white/5 resize-none shadow-inner"
+                                                    value={bulkText}
+                                                    onChange={e => setBulkText(e.target.value)}
+                                                />
+                                            </div>
+                                        )}
+
+                                        {!editingItem && (
+                                            <div className="space-y-4">
+                                                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] px-2">Cycle Duration (Years)</label>
+                                                <input
+                                                    type="number" required min={1} max={7}
+                                                    className="w-full px-8 py-6 bg-white/5 border border-white/5 rounded-2xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/30 font-black text-xs text-white tracking-widest uppercase"
+                                                    value={newProgramme.duration_years}
+                                                    onChange={e => setNewProgramme({ ...newProgramme, duration_years: parseInt(e.target.value) })}
+                                                />
+                                            </div>
+                                        )}
+                                        <div className="space-y-4">
+                                            <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] px-2">Sector Parent</label>
+                                            <select
+                                                required
+                                                className="w-full px-8 py-6 bg-white/5 border border-white/5 rounded-2xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/30 font-black text-xs text-white/60 tracking-widest uppercase appearance-none"
+                                                value={editingItem ? editingItem.faculty_id : newProgramme.faculty_id}
+                                                onChange={e => editingItem ? setEditingItem({...editingItem, faculty_id: e.target.value}) : setNewProgramme({ ...newProgramme, faculty_id: e.target.value })}
+                                            >
+                                                <option value="" className="bg-bg">SELECT PARENT SECTOR</option>
+                                                {faculties.map(f => <option key={f.id} value={f.id} className="bg-bg">{f.name} ({f.university_name})</option>)}
+                                            </select>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {modalType === 'course' && (
+                                    <div className="space-y-8">
+                                        {!editingItem && (
+                                            <div className="flex justify-end">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsBulkEntry(!isBulkEntry)}
+                                                    className="px-5 py-2 rounded-xl bg-white/5 border border-white/10 text-[9px] font-black text-primary uppercase tracking-[0.2em] hover:bg-primary/10 transition-colors flex items-center gap-2"
+                                                >
+                                                    <ListPlus size={14} />
+                                                    {isBulkEntry ? 'Standard Entry' : 'Bulk Uplink'}
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {!isBulkEntry ? (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                <div className="space-y-4">
+                                                    <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] px-2">Unit Cipher (Code)</label>
+                                                    <input
+                                                        type="text" required placeholder="CS101..."
+                                                        className="w-full px-8 py-6 bg-white/5 border border-white/5 rounded-2xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/30 font-black text-xs text-white tracking-widest uppercase placeholder:text-white/5"
+                                                        value={editingItem ? editingItem.code : newCourse.code}
+                                                        onChange={e => editingItem ? setEditingItem({...editingItem, code: e.target.value}) : setNewCourse({ ...newCourse, code: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div className="space-y-4">
+                                                    <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] px-2">Unit Identifier (Title)</label>
+                                                    <input
+                                                        type="text" required placeholder="TITLE..."
+                                                        className="w-full px-8 py-6 bg-white/5 border border-white/5 rounded-2xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/30 font-black text-xs text-white tracking-widest uppercase placeholder:text-white/5"
+                                                        value={editingItem ? editingItem.title : newCourse.title}
+                                                        onChange={e => editingItem ? setEditingItem({...editingItem, title: e.target.value}) : setNewCourse({ ...newCourse, title: e.target.value })}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-4">
+                                                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] px-2">Course Manifest (CODE - TITLE)</label>
+                                                <textarea
+                                                    required
+                                                    placeholder="CS101 - INTRO&#10;CS102 - DATA..."
+                                                    className="w-full h-48 px-8 py-6 bg-white/5 border border-white/5 rounded-2xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/30 font-black text-xs text-white tracking-widest uppercase placeholder:text-white/5 resize-none"
+                                                    value={bulkText}
+                                                    onChange={e => setBulkText(e.target.value)}
+                                                />
+                                            </div>
+                                        )}
+
+                                        <div className="grid grid-cols-2 gap-8">
+                                            <div className="space-y-4">
+                                                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] px-2">Matrix Level</label>
+                                                <select
+                                                    required
+                                                    className="w-full px-8 py-6 bg-white/5 border border-white/5 rounded-2xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/30 font-black text-xs text-white/60 tracking-widest uppercase appearance-none"
+                                                    value={editingItem ? editingItem.level : newCourse.level}
+                                                    onChange={e => editingItem ? setEditingItem({...editingItem, level: parseInt(e.target.value)}) : setNewCourse({ ...newCourse, level: parseInt(e.target.value) })}
+                                                >
+                                                    <option value={100} className="bg-bg">LEVEL 100</option>
+                                                    <option value={200} className="bg-bg">LEVEL 200</option>
+                                                    <option value={300} className="bg-bg">LEVEL 300</option>
+                                                    <option value={400} className="bg-bg">LEVEL 400</option>
+                                                    <option value={500} className="bg-bg">LEVEL 500</option>
+                                                    <option value={600} className="bg-bg">LEVEL 600</option>
+                                                </select>
+                                            </div>
+                                            <div className="space-y-4">
+                                                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] px-2">Operational Cycle</label>
+                                                <select
+                                                    required
+                                                    className="w-full px-8 py-6 bg-white/5 border border-white/5 rounded-2xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/30 font-black text-xs text-white/60 tracking-widest uppercase appearance-none"
+                                                    value={editingItem ? editingItem.semester : newCourse.semester}
+                                                    onChange={e => editingItem ? setEditingItem({...editingItem, semester: parseInt(e.target.value)}) : setNewCourse({ ...newCourse, semester: parseInt(e.target.value) })}
+                                                >
+                                                    <option value={1} className="bg-bg">CYCLE 1</option>
+                                                    <option value={2} className="bg-bg">CYCLE 2</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] px-2">Array Parent</label>
+                                            <select
+                                                required
+                                                className="w-full px-8 py-6 bg-white/5 border border-white/5 rounded-2xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/30 font-black text-xs text-white/60 tracking-widest uppercase appearance-none"
+                                                value={editingItem ? editingItem.programme_id : newCourse.programme_id}
+                                                onChange={e => editingItem ? setEditingItem({...editingItem, programme_id: e.target.value}) : setNewCourse({ ...newCourse, programme_id: e.target.value })}
+                                            >
+                                                <option value="" className="bg-bg">SELECT PARENT ARRAY</option>
+                                                {programmes.map(p => <option key={p.id} value={p.id} className="bg-bg">{p.name} ({p.university_name})</option>)}
+                                            </select>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="flex gap-6 pt-10">
+                                    <button 
+                                        type="button" 
+                                        onClick={() => {
+                                            setShowModal(false)
+                                            setEditingItem(null)
+                                        }} 
+                                        className="flex-1 px-8 py-6 bg-white/5 border border-white/5 text-white/30 font-black text-[10px] uppercase tracking-[0.3em] rounded-2xl hover:bg-white/10 transition-colors"
+                                    >
+                                        Cancel Phase
+                                    </button>
+                                    <button 
+                                        type="submit" 
+                                        disabled={saving}
+                                        className="flex-1 bg-primary text-card font-black text-[10px] uppercase tracking-[0.3em] rounded-2xl py-6 hover:bg-primary/90 transition-all shadow-[0_0_30px_rgba(0,255,204,0.2)] disabled:opacity-20 flex items-center justify-center gap-3"
+                                    >
+                                        {saving ? <Loader2 className="animate-spin" size={18} /> : <Zap size={18} />}
+                                        <span>{saving ? 'Processing...' : 'Execute Commit'}</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             )}

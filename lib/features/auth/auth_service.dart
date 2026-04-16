@@ -50,7 +50,11 @@ class AuthService {
     await _client.auth.signOut();
   }
 
-  Future<void> resetPassword(String email) async {
-    await _client.auth.resetPasswordForEmail(email);
+  Future<void> resendEmail(String email) async {
+    await _client.auth.resend(
+      type: OtpType.signup,
+      email: email,
+      emailRedirectTo: SupabaseConfig.redirectUrl,
+    );
   }
 }

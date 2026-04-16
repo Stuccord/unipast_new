@@ -1,15 +1,15 @@
-import 'dart:ui';
+ 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:unipast/core/theme.dart';
+import 'package:unipast/core/god_mind_theme.dart';
 import 'package:unipast/core/ui_helpers.dart';
 import 'package:unipast/features/auth/auth_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // ---------------------------------------------------------------------------
-// Login Screen
+// Login Screen - Premium Edition
 // ---------------------------------------------------------------------------
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -37,14 +37,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     super.initState();
     _entryController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 1000),
     );
     _fadeAnim = CurvedAnimation(
       parent: _entryController,
       curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
     );
     _slideAnim = Tween<Offset>(
-      begin: const Offset(0, 0.12),
+      begin: const Offset(0, 0.15),
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _entryController,
@@ -73,78 +73,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
       if (mounted) {
         setState(() => _isLoading = false);
-        showSuccessSnackbar(context, 'Login successful!');
+        showSuccessSnackbar(context, 'Neurolink Established. Welcome.');
         context.go('/');
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        showErrorSnackbar(context, 'Login failed: ${e.toString()}');
+        showErrorSnackbar(context, 'Authentication failed: ${e.toString()}');
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final size = MediaQuery.of(context).size;
-
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
+        backgroundColor: GMTheme.bg,
         body: Stack(
           children: [
             // ---------------------------------------------------------------
-            // Full-screen gradient background
+            // Futuristic Neural Background
             // ---------------------------------------------------------------
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 600),
-              width: size.width,
-              height: size.height,
-              decoration: BoxDecoration(
-                gradient: isDark
-                    ? const LinearGradient(
-                        colors: [
-                          Color(0xFF0F172A), 
-                          Color(0xFF070B14), 
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      )
-                    : const LinearGradient(
-                        colors: [
-                          Color(0xFF0A6C5F), 
-                          Color(0xFF064D43), 
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-              ),
-            ),
-
-            // ---------------------------------------------------------------
-            // Decorative blurred circles
-            // ---------------------------------------------------------------
-            Positioned(
-              top: -60,
-              right: -80,
-              child: _GlowCircle(
-                  size: 260, color: Colors.white.withAlpha(isDark ? 10 : 20)),
-            ),
-            Positioned(
-              bottom: -80,
-              left: -60,
-              child: _GlowCircle(
-                  size: 300,
-                  color: const Color(0xFFF59E0B).withAlpha(isDark ? 30 : 25)),
-            ),
-            Positioned(
-              top: size.height * 0.35,
-              left: -40,
-              child: _GlowCircle(
-                  size: 180, color: Colors.white.withAlpha(isDark ? 8 : 12)),
-            ),
+            const AnimatedNeuralBg(),
 
             // ---------------------------------------------------------------
             // Main scrollable content
@@ -152,8 +104,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             SafeArea(
               child: Center(
                 child: SingleChildScrollView(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
                   child: FadeTransition(
                     opacity: _fadeAnim,
                     child: SlideTransition(
@@ -161,61 +113,125 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // Logo + badge
-                          _LogoBadge(isDark: isDark),
-                          const SizedBox(height: 28),
-                          // Glassmorphism card
-                          _GlassCard(
-                            isDark: isDark,
+                          // Logo
+                          const UniPastLogoBadge(),
+                          const SizedBox(height: 32),
+                          
+                          // Form Glass Container
+                          Container(
+                            padding: const EdgeInsets.all(32),
+                            decoration: GMTheme.glassBox,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                // Header
-                                _Header(isDark: isDark),
-                                const SizedBox(height: 32),
-                                // Form
+                                // Heading
+                                Text(
+                                  'INITIALIZE\nCONNECTION',
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.orbitron(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: GMTheme.text,
+                                    letterSpacing: 2,
+                                    height: 1.2,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Enter your credentials to access the UniPast platform.',
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    color: GMTheme.textMuted,
+                                  ),
+                                ),
+                                const SizedBox(height: 40),
+
+                                // Input Fields
                                 Form(
                                   key: _formKey,
                                   child: Column(
                                     children: [
-                                      // Email
-                                      _EmailField(
-                                          controller: _emailController,
-                                          isDark: isDark),
-                                      const SizedBox(height: 18),
-                                      // Password
-                                      _PasswordField(
+                                      _GodMindTextField(
+                                        controller: _emailController,
+                                        label: 'Neuro-Address (Email)',
+                                        icon: Icons.alternate_email_rounded,
+                                        keyboardType: TextInputType.emailAddress,
+                                        validator: (v) {
+                                          if (v == null || v.isEmpty) return 'Identification required';
+                                          if (!v.contains('@')) return 'Invalid address structure';
+                                          return null;
+                                        },
+                                      ),
+                                      const SizedBox(height: 20),
+                                      _GodMindTextField(
                                         controller: _passwordController,
+                                        label: 'Security Cipher (Password)',
+                                        icon: Icons.lock_outline_rounded,
                                         obscure: _obscurePassword,
-                                        isDark: isDark,
-                                        onToggle: () => setState(() =>
-                                            _obscurePassword =
-                                                !_obscurePassword),
+                                        onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
+                                        validator: (v) {
+                                          if (v == null || v.isEmpty) return 'Cipher required';
+                                          if (v.length < 6) return 'Cipher must be at least 6 characters';
+                                          return null;
+                                        },
                                       ),
                                     ],
                                   ),
                                 ),
-                                const SizedBox(height: 12),
+                                const SizedBox(height: 16),
+
                                 // Forgot password
                                 Align(
                                   alignment: Alignment.centerRight,
-                                  child: _ForgotPasswordLink(isDark: isDark),
+                                  child: GestureDetector(
+                                    onTap: () {},
+                                    child: Text(
+                                      'Lost cipher?',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: GMTheme.primary,
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                                const SizedBox(height: 28),
+                                const SizedBox(height: 32),
+
                                 // Login CTA
-                                _LoginButton(
+                                _GodMindLoginButton(
                                   isLoading: _isLoading,
                                   onTap: _isLoading ? null : _onLogin,
                                 ),
                                 const SizedBox(height: 24),
+
                                 // Sign up link
-                                _SignUpLink(isDark: isDark),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "Unregistered entity? ",
+                                      style: GoogleFonts.inter(fontSize: 13, color: GMTheme.textMuted),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () => context.push('/signup'),
+                                      child: Text(
+                                        'Establish Access',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w700,
+                                          color: GMTheme.accent,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 28),
+                          const SizedBox(height: 32),
                           // Social proof
-                          const _SocialProofBadge(),
+                          const _GodMindSocialProofBadge(),
                           const SizedBox(height: 16),
                         ],
                       ),
@@ -235,50 +251,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 // Logo + Top Badge
 // ---------------------------------------------------------------------------
 
-class _LogoBadge extends StatelessWidget {
-  final bool isDark;
-  const _LogoBadge({required this.isDark});
+class UniPastLogoBadge extends StatelessWidget {
+  const UniPastLogoBadge({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Logo mark
-        Container(
-          width: 72,
-          height: 72,
-          decoration: BoxDecoration(
-            color: Colors.white.withAlpha(isDark ? 25 : 40),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withAlpha(60), width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha(30),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Text(
-              'UP',
-              style: GoogleFonts.playfairDisplay(
-                fontSize: 26,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-                letterSpacing: 2,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
+        const UniPastCustomLogo(size: 80),
+        const SizedBox(height: 16),
         Text(
-          'UniPast',
-          style: GoogleFonts.playfairDisplay(
-            fontSize: 20,
+          'UNIPAST',
+          style: GoogleFonts.orbitron(
+            fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
-            letterSpacing: 1,
+            color: GMTheme.text,
+            letterSpacing: 4,
           ),
         ),
       ],
@@ -286,270 +274,139 @@ class _LogoBadge extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Glassmorphism Card
-// ---------------------------------------------------------------------------
-
-class _GlassCard extends StatelessWidget {
-  final Widget child;
-  final bool isDark;
-  const _GlassCard({required this.child, required this.isDark});
-
+class UniPastCustomLogo extends StatelessWidget {
+  final double size;
+  const UniPastCustomLogo({this.size = 80, super.key});
+  
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(28, 32, 28, 28),
-          decoration: BoxDecoration(
-            color: isDark
-                ? const Color(0xFF1F2937).withAlpha(230)
-                : Colors.white.withAlpha(230),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withAlpha(20)
-                  : Colors.white.withAlpha(180),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha(isDark ? 80 : 40),
-                blurRadius: 40,
-                offset: const Offset(0, 20),
-              ),
-              BoxShadow(
-                color: isDark
-                    ? const Color(0xFF0D9488).withAlpha(30)
-                    : Colors.white.withAlpha(120),
-                blurRadius: 1,
-                spreadRadius: 0,
-                offset: const Offset(0, 1),
-              ),
-            ],
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: GMTheme.card,
+        borderRadius: BorderRadius.circular(size * 0.25),
+        border: Border.all(color: GMTheme.primary.withAlpha(150), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: GMTheme.primary.withAlpha(50),
+            blurRadius: size * 0.3,
+            offset: Offset(0, size * 0.1),
           ),
-          child: child,
-        ),
+        ],
       ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Header
-// ---------------------------------------------------------------------------
-
-class _Header extends StatelessWidget {
-  final bool isDark;
-  const _Header({required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    final textColor = isDark ? Colors.white : AppTheme.textDark;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              'Welcome Back ',
-              style: GoogleFonts.playfairDisplay(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: textColor,
-                height: 1.2,
-              ),
-            ),
-            const Icon(Icons.front_hand_rounded, size: 28, color: Color(0xFFF59E0B)),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Row(
-          children: [
-            // Gold accent underline bar
-            Container(
-              width: 48,
-              height: 4,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // A stylized 'U' vector
+          Positioned(
+            bottom: size * 0.22,
+            child: Container(
+              width: size * 0.45,
+              height: size * 0.42,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
+                border: Border(
+                  left: BorderSide(color: GMTheme.primary, width: size * 0.08),
+                  right: BorderSide(color: GMTheme.primary, width: size * 0.08),
+                  bottom: BorderSide(color: GMTheme.primary, width: size * 0.08),
                 ),
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(size * 0.2),
+                  bottomRight: Radius.circular(size * 0.2),
+                ),
               ),
             ),
-            const SizedBox(width: 8),
-            Text(
-              'Sign in to UniPast',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                color: isDark ? Colors.white54 : AppTheme.textLight,
+          ),
+          // An accent dot representing future/past 'P' connection
+          Positioned(
+            top: size * 0.25,
+            right: size * 0.27,
+            child: Container(
+              width: size * 0.12,
+              height: size * 0.12,
+              decoration: const BoxDecoration(
+                color: GMTheme.accent,
+                shape: BoxShape.circle,
               ),
             ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Email Field
-// ---------------------------------------------------------------------------
-
-class _EmailField extends StatelessWidget {
-  final TextEditingController controller;
-  final bool isDark;
-  const _EmailField({required this.controller, required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: TextInputType.emailAddress,
-      textInputAction: TextInputAction.next,
-      style: GoogleFonts.inter(
-          fontSize: 15, color: isDark ? Colors.white : AppTheme.textDark),
-      decoration: _fieldDecoration(
-        context,
-        label: 'Email Address',
-        icon: Icons.alternate_email_rounded,
-        isDark: isDark,
+          ),
+        ],
       ),
-      validator: (v) {
-        if (v == null || v.isEmpty) return 'Please enter your email';
-        if (!v.contains('@')) return 'Enter a valid email';
-        return null;
-      },
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// Password Field
+// Custom Text Field
 // ---------------------------------------------------------------------------
 
-class _PasswordField extends StatelessWidget {
+class _GodMindTextField extends StatelessWidget {
   final TextEditingController controller;
-  final bool obscure;
-  final bool isDark;
-  final VoidCallback onToggle;
+  final String label;
+  final IconData icon;
+  final bool? obscure;
+  final VoidCallback? onToggle;
+  final TextInputType? keyboardType;
+  final String? Function(String?) validator;
 
-  const _PasswordField({
+  const _GodMindTextField({
     required this.controller,
-    required this.obscure,
-    required this.isDark,
-    required this.onToggle,
+    required this.label,
+    required this.icon,
+    this.obscure,
+    this.onToggle,
+    this.keyboardType,
+    required this.validator,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
-      obscureText: obscure,
-      textInputAction: TextInputAction.done,
-      style: GoogleFonts.inter(
-          fontSize: 15, color: isDark ? Colors.white : AppTheme.textDark),
-      decoration: _fieldDecoration(
-        context,
-        label: 'Password',
-        icon: Icons.lock_outline_rounded,
-        isDark: isDark,
-        suffix: IconButton(
-          icon: Icon(
-            obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-            size: 20,
-            color: isDark ? Colors.white38 : Colors.grey.shade400,
-          ),
-          onPressed: onToggle,
+      obscureText: obscure ?? false,
+      keyboardType: keyboardType,
+      textInputAction: obscure != null ? TextInputAction.done : TextInputAction.next,
+      style: GoogleFonts.firaCode(fontSize: 15, color: GMTheme.text),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.inter(fontSize: 14, color: GMTheme.textMuted),
+        floatingLabelStyle: GoogleFonts.inter(fontSize: 12, color: GMTheme.primary, fontWeight: FontWeight.w600),
+        prefixIcon: Icon(icon, size: 20, color: GMTheme.textMuted),
+        suffixIcon: onToggle != null
+            ? IconButton(
+                icon: Icon(
+                  obscure! ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                  size: 20,
+                  color: GMTheme.textMuted,
+                ),
+                onPressed: onToggle,
+              )
+            : null,
+        filled: true,
+        fillColor: GMTheme.surface.withAlpha(150),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: GMTheme.divider),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: GMTheme.divider),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: GMTheme.primary, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: GMTheme.danger, width: 1.5),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: GMTheme.danger, width: 2),
         ),
       ),
-      validator: (v) {
-        if (v == null || v.isEmpty) return 'Please enter your password';
-        if (v.length < 6) return 'Password must be at least 6 characters';
-        return null;
-      },
-    );
-  }
-}
-
-InputDecoration _fieldDecoration(
-  BuildContext context, {
-  required String label,
-  required IconData icon,
-  required bool isDark,
-  Widget? suffix,
-}) {
-  final fillColor = isDark ? Colors.white.withAlpha(10) : Colors.grey.shade50;
-  final borderColor =
-      isDark ? Colors.white.withAlpha(30) : Colors.grey.shade200;
-
-  return InputDecoration(
-    labelText: label,
-    labelStyle: GoogleFonts.inter(
-      fontSize: 14,
-      color: isDark ? Colors.white54 : Colors.grey.shade500,
-    ),
-    floatingLabelStyle: GoogleFonts.inter(
-      fontSize: 12,
-      color: AppTheme.primaryTeal,
-      fontWeight: FontWeight.w600,
-    ),
-    prefixIcon: Icon(icon,
-        size: 20, color: isDark ? Colors.white38 : Colors.grey.shade400),
-    suffixIcon: suffix,
-    filled: true,
-    fillColor: fillColor,
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: borderColor),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: borderColor),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: AppTheme.primaryTeal, width: 2),
-    ),
-    errorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: AppTheme.errorRed, width: 1.5),
-    ),
-    focusedErrorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: AppTheme.errorRed, width: 2),
-    ),
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Forgot Password
-// ---------------------------------------------------------------------------
-
-class _ForgotPasswordLink extends StatelessWidget {
-  final bool isDark;
-  const _ForgotPasswordLink({required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        // Forgot password: wired to forgot password flow / recovery
-      },
-      child: Text(
-        'Forgot Password?',
-        style: GoogleFonts.inter(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: const Color(0xFFF59E0B),
-          decoration: TextDecoration.underline,
-          decorationColor: const Color(0xFFF59E0B).withAlpha(120),
-        ),
-      ),
+      validator: validator,
     );
   }
 }
@@ -558,17 +415,17 @@ class _ForgotPasswordLink extends StatelessWidget {
 // Login CTA Button
 // ---------------------------------------------------------------------------
 
-class _LoginButton extends StatefulWidget {
+class _GodMindLoginButton extends StatefulWidget {
   final bool isLoading;
   final VoidCallback? onTap;
 
-  const _LoginButton({required this.isLoading, required this.onTap});
+  const _GodMindLoginButton({required this.isLoading, required this.onTap});
 
   @override
-  State<_LoginButton> createState() => _LoginButtonState();
+  State<_GodMindLoginButton> createState() => _GodMindLoginButtonState();
 }
 
-class _LoginButtonState extends State<_LoginButton> {
+class _GodMindLoginButtonState extends State<_GodMindLoginButton> {
   bool _pressed = false;
 
   @override
@@ -584,44 +441,27 @@ class _LoginButtonState extends State<_LoginButton> {
         scale: _pressed ? 0.95 : 1.0,
         duration: const Duration(milliseconds: 120),
         child: Container(
-          height: 58,
+          height: 56,
           decoration: BoxDecoration(
-            gradient: widget.onTap != null
-                ? const LinearGradient(
-                    colors: [Color(0xFF138577), Color(0xFF0A6C5F)],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  )
-                : null,
-            color: widget.onTap == null ? Colors.grey.shade200 : null,
+            color: widget.onTap == null ? GMTheme.surface : GMTheme.primary.withAlpha(20),
             borderRadius: BorderRadius.circular(16),
-            boxShadow: widget.onTap != null
-                ? [
-                    BoxShadow(
-                      color: AppTheme.primaryTeal.withAlpha(100),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ]
-                : null,
+            border: Border.all(color: widget.onTap == null ? GMTheme.divider : GMTheme.primary.withAlpha(60), width: 2),
+            boxShadow: widget.onTap != null ? [BoxShadow(color: GMTheme.primary.withAlpha(30), blurRadius: 20)] : null,
           ),
           child: Center(
             child: widget.isLoading
                 ? const SizedBox(
                     width: 24,
                     height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
+                    child: CircularProgressIndicator(strokeWidth: 2.5, valueColor: AlwaysStoppedAnimation<Color>(GMTheme.primary)),
                   )
                 : Text(
-                    'Sign In',
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 18,
+                    'AUTHENTICATE',
+                    style: GoogleFonts.orbitron(
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 1,
+                      color: widget.onTap == null ? GMTheme.textMuted : GMTheme.primary,
+                      letterSpacing: 2,
                     ),
                   ),
           ),
@@ -632,96 +472,38 @@ class _LoginButtonState extends State<_LoginButton> {
 }
 
 // ---------------------------------------------------------------------------
-// Sign Up Link
-// ---------------------------------------------------------------------------
-
-class _SignUpLink extends StatelessWidget {
-  final bool isDark;
-  const _SignUpLink({required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          "Don't have an account?  ",
-          style: GoogleFonts.inter(
-            fontSize: 13,
-            color: isDark ? Colors.white54 : Colors.grey.shade500,
-          ),
-        ),
-        GestureDetector(
-          onTap: () => context.push('/signup'),
-          child: Text(
-            'Sign Up',
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFFF59E0B),
-              decoration: TextDecoration.underline,
-              decorationColor: const Color(0xFFF59E0B).withAlpha(120),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Social Proof Badge
 // ---------------------------------------------------------------------------
 
-class _SocialProofBadge extends StatelessWidget {
-  const _SocialProofBadge();
+class _GodMindSocialProofBadge extends StatelessWidget {
+  const _GodMindSocialProofBadge();
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white.withAlpha(20),
+          color: GMTheme.secondary.withAlpha(20),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white.withAlpha(40)),
+          border: Border.all(color: GMTheme.secondary.withAlpha(40)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.verified_rounded,
-                size: 16, color: Color(0xFFF59E0B)),
-            const SizedBox(width: 6),
+            const Icon(Icons.shield_rounded, size: 16, color: GMTheme.secondary),
+            const SizedBox(width: 8),
             Text(
-              'Trusted by 5,000+ KTU students',
+              'Trusted by 5,000+ Students',
               style: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: Colors.white.withAlpha(220),
+                color: GMTheme.text,
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Decorative Blur Circle
-// ---------------------------------------------------------------------------
-
-class _GlowCircle extends StatelessWidget {
-  final double size;
-  final Color color;
-  const _GlowCircle({required this.size, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(shape: BoxShape.circle, color: color),
     );
   }
 }

@@ -30,9 +30,14 @@ Future<void> main() async {
     print("Profiles: ${profilesRes.body}");
 
     final pqRes = await http.get(
-        Uri.parse('$url/rest/v1/past_questions?select=*&limit=1'),
+        Uri.parse('$url/rest/v1/past_questions?select=id,title&limit=1'),
         headers: headers);
-    print("Past Questions: ${pqRes.body}");
+    print("Past Questions Title Check: ${pqRes.body}");
+
+    final notifRes = await http.get(
+        Uri.parse('$url/rest/v1/notifications?select=*&limit=1'),
+        headers: headers);
+    print("Notifications: ${notifRes.body}");
   } catch (e) {
     print("Error: $e");
   }

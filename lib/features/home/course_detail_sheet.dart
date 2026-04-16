@@ -128,6 +128,8 @@ class CourseDetailSheet extends ConsumerWidget {
                               context.push('/pdf-viewer', extra: {
                                 'url': url,
                                 'userName': userName,
+                                'title': q.title ?? 'Past Question',
+                                'id': q.id,
                               });
                             }
                           } catch (e) {
@@ -212,7 +214,7 @@ class _QuestionItem extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Past Question Paper',
+                        question.title ?? 'Past Question Paper',
                         style: GoogleFonts.inter(
                           fontSize: 12,
                           color: AppTheme.textLight,

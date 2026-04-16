@@ -459,7 +459,7 @@ class _StepCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (step == 5) {
-      return _SuccessStep(confettiController: confettiController);
+      return _SuccessStep(confettiController: confettiController, email: state.email);
     }
 
     return Container(
@@ -1393,13 +1393,14 @@ class _Step4LevelSemesterState extends State<_Step4LevelSemester> {
 // Step 5 – Success / Payment CTA
 // ---------------------------------------------------------------------------
 
-class _SuccessStep extends StatelessWidget {
+class _SuccessStep extends ConsumerWidget {
   final ConfettiController confettiController;
+  final String email;
 
-  const _SuccessStep({required this.confettiController});
+  const _SuccessStep({required this.confettiController, required this.email});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1511,6 +1512,42 @@ class _SuccessStep extends StatelessWidget {
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Center(
+                    child: TextButton(
+                      onPressed: () async {
+                        try {
+                          await ref.read(authServiceProvider).resendEmail(email);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Magic link resent! Check your inbox.'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Error: ${e.toString()}'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      child: Text(
+                        "Didn't receive it? Resend Link",
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: Colors.white.withAlpha(200),
+                          fontWeight: FontWeight.w600,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),

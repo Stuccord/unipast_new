@@ -9,29 +9,28 @@ import {
     Upload,
     BarChart3,
     DollarSign,
-    Folder,
     Settings,
-    User,
     LogOut,
     Search,
     Bell,
     GraduationCap,
     Menu,
-    FileText
+    FileText,
+    Zap,
+    Cpu
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 
 const navItems = [
-    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-    { name: 'Manage Papers', href: '/admin/content', icon: FileText },
-    { name: 'Upload New', href: '/admin/upload', icon: Upload },
-    { name: 'Academic Setup', href: '/admin/academic', icon: GraduationCap },
-    { name: 'Campus Reps', href: '/admin/reps', icon: Users },
-    { name: 'Financials', href: '/admin/financials', icon: DollarSign },
-    { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
-    { name: 'Settings', href: '/admin/settings', icon: Settings },
+    { name: 'Terminal', href: '/admin', icon: LayoutDashboard },
+    { name: 'Resources', href: '/admin/content', icon: FileText },
+    { name: 'Injection', href: '/admin/upload', icon: Upload },
+    { name: 'Core Setup', href: '/admin/academic', icon: GraduationCap },
+    { name: 'Agents / Reps', href: '/admin/reps', icon: Users },
+    { name: 'Revenue Flux', href: '/admin/financials', icon: DollarSign },
+    { name: 'Neural Analytics', href: '/admin/analytics', icon: BarChart3 },
+    { name: 'System Config', href: '/admin/settings', icon: Settings },
 ]
 
 export default function AdminLayout({
@@ -52,8 +51,6 @@ export default function AdminLayout({
                 const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
                 if (data) {
                     setProfile(data)
-                    
-                    // Route Guard: If user is rep, prevent them from accessing restricted pages
                     const isRep = data.role === 'rep' || data.is_rep
                     const restrictedPaths = ['/admin/financials', '/admin/analytics', '/admin/academic', '/admin/reps', '/admin/settings']
                     if (isRep && restrictedPaths.includes(pathname)) {
@@ -68,7 +65,6 @@ export default function AdminLayout({
         fetchProfile()
     }, [pathname, router])
 
-    // Responsiveness: Close sidebar on mobile by default, and on route change
     useEffect(() => {
         if (typeof window !== 'undefined' && window.innerWidth < 1024) {
             setIsSidebarOpen(false)
@@ -86,48 +82,63 @@ export default function AdminLayout({
         router.push('/login')
     }
 
-    // Filter nav items for representatives
     const visibleNavItems = navItems.filter(item => {
         const isRep = profile?.role === 'rep' || profile?.is_rep
         if (isRep) {
-            // Reps only see Dashboard, Manage Papers, Upload New
-            return ['Dashboard', 'Manage Papers', 'Upload New'].includes(item.name)
+            return ['Terminal', 'Resources', 'Injection'].includes(item.name)
         }
-        return true // Admins see everything
+        return true
     })
 
     if (loading) {
         return (
-            <div className="flex h-screen items-center justify-center bg-slate-50">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0D9488]"></div>
+            <div className="flex h-screen items-center justify-center bg-bg">
+                <div className="relative w-20 h-20">
+                    <div className="absolute inset-0 border-4 border-primary/20 rounded-full" />
+                    <div className="absolute inset-0 border-4 border-primary rounded-full border-t-transparent animate-spin" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-white font-orbitron font-black text-xl">U</span>
+                    </div>
+                </div>
             </div>
         )
     }
 
     return (
-        <div className="flex h-screen bg-slate-50 font-sans relative overflow-hidden">
+        <div className="flex h-screen bg-bg font-inter relative overflow-hidden text-white">
+            {/* Background elements */}
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] -z-10" />
+            <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-secondary/5 rounded-full blur-[100px] -z-10" />
+            
             {/* Mobile Backdrop */}
             {isSidebarOpen && (
                 <div 
-                    className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
+                    className="fixed inset-0 bg-black/60 backdrop-blur-md z-40 lg:hidden transition-opacity duration-300"
                     onClick={() => setIsSidebarOpen(false)}
                 />
             )}
 
             {/* Sidebar */}
-            <aside className={`fixed inset-y-0 left-0 z-50 bg-[#1E293B] text-slate-300 flex flex-col shadow-xl transition-all duration-300 ease-in-out lg:static lg:inset-auto overflow-hidden ${
+            <aside className={`fixed inset-y-0 left-0 z-50 bg-card/60 backdrop-blur-2xl border-r border-white/5 flex flex-col shadow-2xl transition-all duration-500 ease-in-out lg:static lg:inset-auto overflow-hidden ${
                 isSidebarOpen 
-                    ? 'translate-x-0 w-72 opacity-100' 
+                    ? 'translate-x-0 w-[280px] opacity-100' 
                     : '-translate-x-full lg:translate-x-0 lg:w-0 lg:opacity-0'
             }`}>
-                <div className="p-6 flex items-center space-x-3">
-                    <div className="bg-[#0D9488] p-2 rounded-lg">
-                        <GraduationCap className="text-white" size={24} />
-                    </div>
-                    <h2 className="text-2xl font-bold text-white tracking-tight">UniPast</h2>
+                <div className="p-8 pb-12 flex items-center justify-center">
+                    <Link href="/admin" className="flex flex-col items-center">
+                        <div className="relative w-12 h-12 mb-4">
+                            <div className="absolute inset-0 bg-primary/20 rounded-xl blur-lg animate-pulse" />
+                            <div className="relative w-full h-full bg-surface border border-primary/50 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(0,255,204,0.2)]">
+                                <span className="text-xl font-black font-orbitron text-primary tracking-tighter">U</span>
+                            </div>
+                        </div>
+                        <h2 className="text-xl font-black text-white tracking-[0.2em] font-orbitron uppercase">UniPast</h2>
+                        <span className="text-[8px] font-black text-primary/50 tracking-[0.4em] uppercase font-orbitron mt-1">Operational</span>
+                    </Link>
                 </div>
 
-                <nav className="flex-1 px-4 py-4 space-y-1">
+                <nav className="flex-1 px-4 space-y-2 overflow-y-auto">
+                    <p className="px-4 pb-2 text-[10px] font-black text-white/20 uppercase tracking-[0.2em] font-orbitron">Systems Hub</p>
                     {visibleNavItems.map((item) => {
                         const Icon = item.icon
                         const isActive = pathname === item.href
@@ -135,113 +146,132 @@ export default function AdminLayout({
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className={`group flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 relative ${isActive
-                                        ? 'bg-[#334155] text-white'
-                                        : 'hover:bg-[#334155] hover:text-white'
+                                className={`group flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 relative ${isActive
+                                        ? 'bg-primary/10 text-primary shadow-[inset_0_0_20px_rgba(0,255,204,0.05)]'
+                                        : 'hover:bg-white/5 text-white/50 hover:text-white'
                                     }`}
                             >
-                                <div className="flex items-center space-x-3">
-                                    <Icon size={20} className={isActive ? 'text-[#0D9488]' : 'text-slate-400 group-hover:text-white'} />
-                                    <span className="font-medium text-sm">{item.name}</span>
-                                </div>
+                                <Icon size={18} className={`${isActive ? 'text-primary' : 'text-white/30 group-hover:text-white'} transition-colors duration-300`} />
+                                <span className={`text-[11px] font-black uppercase tracking-[0.15em] font-orbitron ${isActive ? 'translate-x-0' : 'translate-x-0 group-hover:translate-x-1'} transition-transform duration-300`}>
+                                    {item.name}
+                                </span>
                                 {isActive && (
-                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#0D9488] rounded-r-full" />
+                                    <div className="absolute right-4 w-1 h-5 bg-primary rounded-full shadow-[0_0_10px_#00FFCC]" />
                                 )}
                             </Link>
                         )
                     })}
                 </nav>
 
-                <div className="p-4 border-t border-slate-700/50">
-                    <div className="flex items-center space-x-3 px-4 py-2">
-                        <div className="relative h-10 w-10 rounded-full overflow-hidden border-2 border-slate-600">
-                             {profile?.avatar_url ? (
-                                <img src={profile.avatar_url} alt="Profile" className="h-full w-full object-cover" />
-                             ) : (
-                                <div className="h-full w-full bg-slate-500 flex items-center justify-center text-white text-xs font-bold">
-                                    {profile?.full_name ? profile.full_name.split(' ').map((n: string) => n[0]).join('') : 'A'}
-                                </div>
-                             )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-white truncate">{profile?.full_name || 'Admin'}</p>
+                <div className="p-4 pt-8">
+                    <div className="bg-white/5 rounded-3xl p-6 border border-white/5 relative overflow-hidden group hover:border-primary/20 transition-colors">
+                        <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors" />
+                        <div className="flex items-center gap-4 relative z-10">
+                            <div className="h-12 w-12 rounded-2xl overflow-hidden border-2 border-white/10 group-hover:border-primary/30 transition-all flex-shrink-0">
+                                 {profile?.avatar_url ? (
+                                    <img src={profile.avatar_url} alt="Profile" className="h-full w-full object-cover" />
+                                 ) : (
+                                    <div className="h-full w-full bg-surface flex items-center justify-center text-white/50 text-xs font-bold font-orbitron uppercase">
+                                        {profile?.full_name ? profile.full_name.split(' ').map((n: string) => n[0]).join('') : 'A'}
+                                    </div>
+                                 )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-[11px] font-black text-white truncate font-orbitron uppercase tracking-wider">{profile?.full_name || 'Administrator'}</p>
+                                <p className="text-[9px] font-black text-primary/50 uppercase tracking-[0.1em] font-orbitron mt-0.5">{profile?.role || 'Root Access'}</p>
+                            </div>
                         </div>
                         <button 
                             onClick={handleLogout}
-                            className="text-slate-500 hover:text-white transition-colors"
+                            className="mt-6 w-full py-3 bg-danger/10 hover:bg-danger/20 text-danger text-[9px] font-black font-orbitron uppercase tracking-[0.3em] rounded-xl flex items-center justify-center gap-2 transition-all group/logout"
                         >
-                            <LogOut size={18} />
+                            <LogOut size={14} className="group-hover/logout:-translate-x-1 transition-transform" />
+                            Terminate Session
                         </button>
                     </div>
                 </div>
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 flex flex-col overflow-hidden">
+            <main className="flex-1 flex flex-col overflow-hidden relative">
                 {/* Top Header */}
-                <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0 z-30">
-                    <div className="flex items-center space-x-4">
+                <header className="h-[90px] bg-bg/40 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-10 shrink-0 z-30">
+                    <div className="flex items-center space-x-6">
                         <button 
                             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                            className="text-slate-400 hover:text-slate-600 lg:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors"
+                            className="text-white/40 hover:text-primary p-2 bg-white/5 border border-white/5 rounded-xl transition-all lg:hidden"
                         >
-                            <Menu size={24} />
+                            <Menu size={22} />
                         </button>
-                        <div className="flex items-center space-x-2">
-                            <button 
-                                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                                className="text-slate-400 hover:text-[#0D9488] transition-colors p-1 rounded-md hover:bg-slate-100"
-                                title="Toggle Sidebar"
-                            >
-                                <Menu size={20} />
-                            </button>
-                            <h1 className="text-lg font-bold text-slate-800 tracking-tight">
-                                {navItems.find(i => i.href === pathname)?.name || 'Dashboard'}
-                            </h1>
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-primary/10 rounded-xl border border-primary/20">
+                                <Cpu size={20} className="text-primary" />
+                            </div>
+                            <div>
+                                <h1 className="text-[10px] font-black text-primary/50 uppercase tracking-[0.3em] font-orbitron leading-none mb-1.5">
+                                    Systems Interface
+                                </h1>
+                                <p className="text-base font-black text-white uppercase tracking-[0.1em] font-orbitron">
+                                    {navItems.find(i => i.href === pathname)?.name || 'Dashboard'}
+                                </p>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center space-x-6">
-                        <div className="relative w-80">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <div className="hidden md:flex items-center space-x-8">
+                        <div className="relative h-[48px]">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={18} />
                             <input
                                 type="text"
-                                placeholder="Search"
-                                className="w-full bg-slate-100 border-none rounded-full py-2.5 pl-11 pr-4 text-sm focus:ring-2 focus:ring-[#0D9488]/20 transition-all outline-none"
+                                placeholder="Neural Search Engine"
+                                className="h-full bg-white/5 border border-white/5 rounded-2xl pl-12 pr-6 text-xs font-black font-orbitron tracking-widest text-white/60 focus:ring-4 focus:ring-primary/5 focus:border-primary/30 transition-all outline-none w-[320px] placeholder:text-white/10 placeholder:uppercase"
                             />
                         </div>
                         
-                        <div className="flex items-center space-x-4 text-slate-400">
-                            <Link href="/admin/settings" className="hover:text-slate-600 transition-colors">
-                                <Settings size={22} />
-                            </Link>
+                        <div className="flex items-center gap-4">
                             <button 
-                                onClick={() => alert('No new notifications')}
-                                className="hover:text-slate-600 transition-colors relative"
+                                onClick={() => alert('Neural connection stable. No alerts.')}
+                                className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/5 border border-white/5 text-white/30 hover:text-primary hover:border-primary/20 transition-all relative group"
                             >
-                                <Bell size={22} />
-                                <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full border-2 border-white"></span>
+                                <Bell size={20} className="group-hover:animate-bounce" />
+                                <span className="absolute top-3.5 right-3.5 h-2 w-2 bg-primary rounded-full border-2 border-bg shadow-[0_0_10px_#00FFCC]"></span>
                             </button>
-                        </div>
-
-                        <div className="h-10 w-10 rounded-full overflow-hidden border border-slate-200">
-                             {profile?.avatar_url ? (
-                                <img src={profile.avatar_url} alt="Profile" className="h-full w-full object-cover" />
-                             ) : (
-                                <div className="h-full w-full bg-slate-200 flex items-center justify-center text-slate-500 text-xs font-bold">
-                                    {profile?.full_name ? profile.full_name.split(' ').map((n: string) => n[0]).join('') : 'A'}
+                            
+                            <div className="flex items-center gap-4 pl-4 border-l border-white/5">
+                                <div className="text-right">
+                                    <p className="text-[10px] font-black text-white uppercase tracking-[0.1em] font-orbitron leading-none mb-1">Status</p>
+                                    <p className="text-[9px] font-black text-primary uppercase tracking-[0.2em] font-orbitron flex items-center gap-2">
+                                        Active
+                                        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_#00FFCC]" />
+                                    </p>
                                 </div>
-                             )}
+                            </div>
                         </div>
                     </div>
                 </header>
 
                 {/* Content Area */}
-                <div className="flex-1 overflow-y-auto bg-white">
-                    <div className="p-8 max-w-[1600px] mx-auto">
+                <div className="flex-1 overflow-y-auto custom-scrollbar relative">
+                    <div className="p-10 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
                         {children}
                     </div>
                 </div>
+
+                <style jsx global>{`
+                    .custom-scrollbar::-webkit-scrollbar {
+                        width: 4px;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-track {
+                        background: rgba(255, 255, 255, 0.02);
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-thumb {
+                        background: rgba(0, 255, 204, 0.1);
+                        border-radius: 10px;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                        background: rgba(0, 255, 204, 0.3);
+                    }
+                `}</style>
             </main>
         </div>
     )

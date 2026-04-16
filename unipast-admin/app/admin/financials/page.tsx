@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { CreditCard, Download, Search, Filter, ArrowUpRight, ChevronRight, MoreVertical, Wallet, X, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import { 
+    CreditCard, Download, Search, Filter, ArrowUpRight, 
+    ChevronRight, MoreVertical, Wallet, X, CheckCircle2, 
+    AlertCircle, Loader2, TrendingUp, BarChart3, ShieldCheck, Zap
+} from 'lucide-react'
 
 export default function FinancialsPage() {
     const [transactions, setTransactions] = useState<any[]>([])
@@ -43,7 +47,7 @@ export default function FinancialsPage() {
         const link = document.createElement('a')
         const url = URL.createObjectURL(blob)
         link.setAttribute('href', url)
-        link.setAttribute('download', `unipast_transactions_${new Date().toISOString().split('T')[0]}.csv`)
+        link.setAttribute('download', `unipast_financial_ledger_${new Date().toISOString().split('T')[0]}.csv`)
         link.style.visibility = 'hidden'
         document.body.appendChild(link)
         link.click()
@@ -53,9 +57,8 @@ export default function FinancialsPage() {
     const handleInitiatePayout = async () => {
         setPayoutLoading(true)
         setStatus(null)
-        // Simulate payout logic
         await new Promise(resolve => setTimeout(resolve, 2000))
-        setStatus({ type: 'success', message: 'Payout cycle initiated successfully for all pending balances.' })
+        setStatus({ type: 'success', message: 'ECONOMIC BALANCE RESTORED. PAYOUT CYCLE AUTHORIZED.' })
         setPayoutLoading(false)
         setTimeout(() => setShowPayoutModal(false), 3000)
     }
@@ -68,136 +71,159 @@ export default function FinancialsPage() {
     const totalRevenue = transactions.reduce((acc, curr) => acc + (curr.amount || 0), 0)
 
     return (
-        <div className="space-y-10">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                <div className="space-y-1">
-                    <h2 className="text-3xl font-black text-slate-800 tracking-tight">Financial Treasury</h2>
-                    <p className="text-slate-500 font-medium tracking-tight">Monitor platform revenue, subscriptions and payout cycles.</p>
+        <div className="space-y-12 font-orbitron pb-32">
+            <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
+                <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-secondary/10 rounded-xl border border-secondary/20">
+                            <TrendingUp size={22} className="text-secondary animate-pulse" />
+                        </div>
+                        <span className="text-[10px] font-black text-secondary uppercase tracking-[0.4em]">Economic Control Grid v1.12</span>
+                    </div>
+                    <h2 className="text-4xl font-black text-white tracking-tight uppercase tracking-widest">Neural Monetary Matrix</h2>
+                    <p className="text-white/30 font-black text-[10px] uppercase tracking-[0.3em]">Overseeing platform liquidity, credit flow, and protocol settlements.</p>
                 </div>
-                <div className="flex items-center space-x-3">
+                
+                <div className="flex items-center gap-4">
                     <button 
                         onClick={handleExport}
-                        className="bg-white border border-slate-100 text-slate-700 font-bold py-4 px-8 rounded-2xl flex items-center space-x-3 hover:bg-slate-50 transition-all shadow-sm"
+                        className="h-16 px-8 bg-card border border-white/5 text-white/40 font-black text-[10px] uppercase tracking-[0.3em] rounded-2xl hover:bg-white/5 hover:text-white transition-all flex items-center gap-3"
                     >
                         <Download size={20} />
-                        <span>Export Report</span>
+                        <span>Extract Ledger</span>
                     </button>
                     <button 
                         onClick={() => setShowPayoutModal(true)}
-                        className="bg-[#0D9488] hover:bg-teal-700 text-white font-bold py-4 px-8 rounded-2xl flex items-center space-x-3 transition-all shadow-xl shadow-teal-700/20"
+                        className="h-16 px-10 bg-secondary text-card font-black text-[10px] uppercase tracking-[0.3em] rounded-2xl hover:bg-secondary/90 transition-all shadow-[0_0_30px_rgba(255,160,0,0.2)] flex items-center gap-3"
                     >
                         <Wallet size={20} />
-                        <span>Payouts</span>
+                        <span>Capital Allocation</span>
                     </button>
                 </div>
             </div>
 
-            {/* Premium Summary Card */}
-            <div className="bg-slate-900 p-12 rounded-[2.5rem] shadow-2xl text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-12 opacity-5">
-                    <CreditCard size={240} />
+            <div className="bg-card/20 backdrop-blur-3xl p-12 rounded-[3.5rem] border border-white/5 relative overflow-hidden group shadow-2xl animate-in fade-in zoom-in duration-1000">
+                <div className="absolute top-0 right-0 p-12 text-secondary/5 group-hover:text-secondary/10 transition-colors pointer-events-none">
+                    <BarChart3 size={320} strokeWidth={0.5} />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 relative z-10">
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 relative z-10">
                     <div className="space-y-4">
-                        <p className="text-teal-400 text-xs font-black uppercase tracking-[0.2em]">Total Net Revenue</p>
-                        <h3 className="text-5xl font-black tracking-tight flex items-baseline">
-                            <span className="text-2xl text-slate-500 mr-2">GH₵</span>
-                            {totalRevenue.toLocaleString()}
-                        </h3>
+                        <p className="text-secondary text-[10px] font-black uppercase tracking-[0.4em]">Total Net Liquidity</p>
+                        <div className="flex items-baseline group/val transition-all">
+                            <span className="text-xl text-white/20 font-black mr-3 tracking-widest">GH₵</span>
+                            <h3 className="text-6xl font-black text-white tabular-nums tracking-tighter group-hover:text-secondary transition-colors duration-500">
+                                {totalRevenue.toLocaleString()}
+                            </h3>
+                        </div>
                     </div>
-                    <div className="space-y-4 md:border-l md:border-slate-800 md:pl-12">
-                        <p className="text-slate-400 text-xs font-black uppercase tracking-[0.2em]">Platform Growth</p>
-                        <div className="flex items-center space-x-4">
-                            <h4 className="text-3xl font-black">+{((totalRevenue / 1000) * 0.5).toFixed(1)}%</h4>
-                            <div className="h-8 w-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                                <ArrowUpRight size={16} />
+                    
+                    <div className="space-y-4 lg:border-l lg:border-white/5 lg:pl-16">
+                        <p className="text-white/30 text-[10px] font-black uppercase tracking-[0.4em]">Protocol Expansion</p>
+                        <div className="flex items-center gap-6">
+                            <h4 className="text-4xl font-black text-white tabular-nums tracking-tight">+{((totalRevenue / 1000) * 0.5).toFixed(1)}%</h4>
+                            <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20 animate-bounce">
+                                <ArrowUpRight size={22} />
                             </div>
                         </div>
                     </div>
-                    <div className="space-y-4 md:border-l md:border-slate-800 md:pl-12">
-                        <p className="text-slate-400 text-xs font-black uppercase tracking-[0.2em]">Total Transactions</p>
-                        <h4 className="text-3xl font-black">{transactions.length.toLocaleString()}</h4>
+
+                    <div className="space-y-4 lg:border-l lg:border-white/5 lg:pl-16">
+                        <p className="text-white/30 text-[10px] font-black uppercase tracking-[0.4em]">Processed Bytes</p>
+                        <h4 className="text-4xl font-black text-white tabular-nums tracking-tight">{transactions.length.toLocaleString()}</h4>
                     </div>
-                    <div className="space-y-4 md:border-l md:border-slate-800 md:pl-12">
-                        <p className="text-slate-400 text-xs font-black uppercase tracking-[0.2em]">Payment Success</p>
-                        <h4 className="text-3xl font-black">99.8%</h4>
+
+                    <div className="space-y-4 lg:border-l lg:border-white/5 lg:pl-16">
+                        <p className="text-white/30 text-[10px] font-black uppercase tracking-[0.4em]">Protocol Success</p>
+                        <div className="flex items-center gap-4">
+                            <h4 className="text-4xl font-black text-white tabular-nums tracking-tight">99.8%</h4>
+                            <ShieldCheck className="text-primary animate-pulse" size={32} strokeWidth={1.5} />
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
-                <div className="p-8 bg-slate-50/50 border-b border-slate-100/50 flex flex-col md:flex-row gap-6">
-                    <div className="relative flex-1 max-w-xl">
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            <div className="bg-card/20 backdrop-blur-3xl rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-200">
+                <div className="p-10 border-b border-white/5 bg-white/[0.01] flex flex-col md:flex-row gap-8">
+                    <div className="relative flex-1 group">
+                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-secondary transition-colors" size={22} />
                         <input
                             type="text"
-                            placeholder="Search by ID, Customer Name or Reference..."
+                            placeholder="SCAN TRANSACTION LOGS OR REF IDs..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-14 pr-6 py-4 rounded-2xl bg-white border-none outline-none focus:ring-2 focus:ring-[#0D9488]/20 transition-all font-medium text-slate-700 shadow-sm"
+                            className="w-full pl-16 pr-8 py-5 rounded-2xl bg-white/5 border border-white/5 outline-none focus:ring-4 focus:ring-secondary/5 focus:border-secondary/30 transition-all font-black text-[10px] text-white tracking-[0.3em] placeholder:text-white/10 uppercase"
                         />
                     </div>
-                    <button className="flex items-center space-x-3 px-8 py-4 bg-white border border-slate-100 rounded-2xl text-slate-600 hover:bg-slate-50 transition-all font-bold shadow-sm">
+                    <button className="flex items-center justify-center gap-4 px-10 h-16 bg-white/5 border border-white/10 rounded-2xl text-white/40 hover:bg-white/10 hover:text-white transition-all font-black text-[10px] uppercase tracking-[0.3em]">
                         <Filter size={20} />
-                        <span>Filter History</span>
+                        <span>Filter Matrix</span>
                     </button>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="text-slate-400 font-black text-xs uppercase tracking-[0.2em]">
-                                <th className="px-10 py-6">Transaction ID</th>
-                                <th className="px-10 py-6">Customer</th>
-                                <th className="px-10 py-6">Amount</th>
-                                <th className="px-10 py-6">Timeline</th>
-                                <th className="px-10 py-6 text-right">Status</th>
+                            <tr className="bg-white/[0.02] border-white/5">
+                                <th className="px-10 py-8 text-[9px] font-black text-white/30 uppercase tracking-[0.4em]">LOG_IDENTIFIER</th>
+                                <th className="px-10 py-8 text-[9px] font-black text-white/30 uppercase tracking-[0.4em]">ENTITY</th>
+                                <th className="px-10 py-8 text-[9px] font-black text-white/30 uppercase tracking-[0.4em]">LIQUIDITY_MAP</th>
+                                <th className="px-10 py-8 text-[9px] font-black text-white/30 uppercase tracking-[0.4em]">TIMESTAMP</th>
+                                <th className="px-10 py-8 text-[9px] font-black text-white/30 uppercase tracking-[0.4em] text-right">PROTOCOL_STATUS</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100">
+                        <tbody className="divide-y divide-white/5">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={5} className="px-10 py-24 text-center">
-                                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0D9488] mx-auto"></div>
+                                    <td colSpan={5} className="px-10 py-40 text-center">
+                                         <div className="relative w-24 h-24 mx-auto">
+                                            <div className="absolute inset-0 border-4 border-secondary/20 rounded-full" />
+                                            <div className="absolute inset-0 border-4 border-secondary rounded-full border-t-transparent animate-spin shadow-[0_0_20px_#FFA000]" />
+                                         </div>
                                     </td>
                                 </tr>
                             ) : filteredTransactions.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-10 py-24 text-center text-slate-400 font-bold tracking-widest uppercase text-xs">No records found</td>
+                                    <td colSpan={5} className="px-10 py-40 text-center text-white/10 font-black tracking-[0.8em] uppercase text-sm underline decoration-secondary/20 underline-offset-8">NO DATA FLOW DETECTED</td>
                                 </tr>
                             ) : (
                                 filteredTransactions.map((t) => (
-                                    <tr key={t.id} className="hover:bg-slate-50/50 transition duration-150 group">
+                                    <tr key={t.id} className="hover:bg-white/[0.03] transition-colors duration-500 group">
                                         <td className="px-10 py-8">
-                                            <div className="flex items-center space-x-4">
-                                                <div className="h-12 w-12 rounded-xl bg-slate-100 text-[#0D9488] flex items-center justify-center font-black">
-                                                    <CreditCard size={20} />
+                                            <div className="flex items-center gap-6">
+                                                <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 text-white/20 group-hover:text-secondary group-hover:border-secondary/40 transition-all duration-700 flex items-center justify-center">
+                                                    <CreditCard size={24} strokeWidth={1.5} />
                                                 </div>
                                                 <div>
-                                                    <p className="font-black text-slate-800 tracking-tight">{t.reference || 'N/A'}</p>
-                                                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{t.channel || 'Paystack Gateway'}</p>
+                                                    <p className="font-black text-white tracking-widest text-sm uppercase group-hover:text-secondary transition-colors duration-500">{t.reference || 'SYSTEM_PROC'}</p>
+                                                    <p className="text-[9px] text-white/20 font-black uppercase tracking-[0.3em] mt-1">{t.channel || 'PAYSTACK_GATEWAY'}</p>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-10 py-8">
-                                            <span className="font-bold text-slate-700">{t.profiles?.full_name || 'System User'}</span>
+                                            <span className="text-[11px] font-black text-white/50 uppercase tracking-widest">{t.profiles?.full_name || 'ANONYMOUS_ENTITY'}</span>
                                         </td>
                                         <td className="px-10 py-8">
-                                            <span className="font-black text-slate-800 text-lg">GH₵ {(t.amount || 0).toLocaleString()}</span>
+                                            <div className="flex items-baseline gap-2 group-hover:translate-x-1 transition-transform duration-500">
+                                                <span className="text-[10px] text-white/20 font-black tracking-widest">GH₵</span>
+                                                <span className="font-black text-white text-xl tabular-nums tracking-tighter">{(t.amount || 0).toLocaleString()}</span>
+                                            </div>
                                         </td>
                                         <td className="px-10 py-8">
-                                            <p className="text-sm font-bold text-slate-500">
+                                            <p className="text-[11px] font-black text-white/60 tracking-widest uppercase">
                                                 {new Date(t.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                                             </p>
-                                            <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">
+                                            <p className="text-[9px] text-white/20 font-black uppercase tracking-widest mt-1">
                                                 {new Date(t.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                                             </p>
                                         </td>
                                         <td className="px-10 py-8 text-right">
-                                            <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ring-1 ring-inset ${
-                                                t.status === 'Success' ? 'bg-emerald-50 text-emerald-600 ring-emerald-600/20' : 'bg-amber-50 text-amber-600 ring-amber-600/20'
+                                            <span className={`px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-[0.3em] border shadow-[0_0_15px_rgba(0,0,0,0.5)] ${
+                                                t.status === 'Success' 
+                                                ? 'bg-primary/5 border-primary/20 text-primary shadow-primary/5' 
+                                                : 'bg-secondary/5 border-secondary/20 text-secondary shadow-secondary/5'
                                             }`}>
-                                                {t.status}
+                                                {t.status || 'VERIFIED'}
                                             </span>
                                         </td>
                                     </tr>
@@ -210,55 +236,67 @@ export default function FinancialsPage() {
 
             {/* Payout Modal */}
             {showPayoutModal && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-                    <div className="bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in duration-300">
-                        <div className="p-10 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-                            <div>
-                                <h3 className="text-2xl font-black text-slate-800 tracking-tight">Payout Management</h3>
-                                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest">Administrator Treasury Control</p>
+                <div className="fixed inset-0 bg-bg/90 backdrop-blur-3xl z-[200] flex items-center justify-center p-6 animate-in fade-in duration-500">
+                    <div className="bg-card border border-white/5 rounded-[3.5rem] w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in duration-500 relative">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-secondary shadow-[0_0_20px_#FFA000]" />
+                        <div className="p-12 border-b border-white/5 flex items-center justify-between">
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-3">
+                                    <Zap size={18} className="text-secondary" />
+                                    <h3 className="text-3xl font-black text-white tracking-widest uppercase">Treasury Override</h3>
+                                </div>
+                                <p className="text-white/20 font-black text-[10px] uppercase tracking-[0.5em]">SYSTEM PROTOCOL_PAYOUT v9</p>
                             </div>
-                            <button onClick={() => setShowPayoutModal(false)} className="p-3 bg-white text-slate-400 hover:text-slate-800 rounded-2xl shadow-sm transition-all">
-                                <X size={24} />
+                            <button onClick={() => setShowPayoutModal(false)} className="h-14 w-14 bg-white/5 hover:bg-white/10 text-white/20 hover:text-white rounded-[1.5rem] border border-white/5 transition-all flex items-center justify-center">
+                                <X size={28} />
                             </button>
                         </div>
                         
-                        <div className="p-12 space-y-10">
+                        <div className="p-16 space-y-12">
                             {status ? (
-                                <div className={`p-8 rounded-3xl border flex items-center space-x-6 ${
-                                    status.type === 'success' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-rose-50 border-rose-100 text-rose-700'
-                                }`}>
-                                    <CheckCircle2 size={32} />
-                                    <p className="text-lg font-black tracking-tight">{status.message}</p>
+                                <div className="p-12 bg-primary/5 rounded-[2.5rem] border border-primary/20 flex flex-col items-center text-center gap-8 animate-in slide-in-from-bottom-8 duration-700">
+                                    <div className="h-20 w-20 rounded-full bg-primary text-card flex items-center justify-center shadow-[0_0_40px_rgba(0,255,204,0.4)]">
+                                        <CheckCircle2 size={48} strokeWidth={2.5} />
+                                    </div>
+                                    <p className="text-xl font-black text-primary tracking-widest uppercase underline underline-offset-8 decoration-primary/20 leading-relaxed">{status.message}</p>
                                 </div>
                             ) : (
                                 <>
-                                    <div className="grid grid-cols-2 gap-8">
-                                        <div className="p-8 bg-slate-50 rounded-3xl space-y-2">
-                                            <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Pending Balance</p>
-                                            <h4 className="text-3xl font-black text-slate-800 tracking-tight">GH₵ {(totalRevenue * 0.12).toLocaleString()}</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                        <div className="p-10 bg-white/[0.02] border border-white/5 rounded-[2.5rem] space-y-3 group hover:border-secondary/30 transition-all duration-500 relative overflow-hidden">
+                                            <div className="absolute top-0 right-0 p-6 text-secondary/5">
+                                                <Wallet size={60} />
+                                            </div>
+                                            <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em]">Pending Net Pulse</p>
+                                            <h4 className="text-4xl font-black text-white tracking-tighter tabular-nums group-hover:text-secondary transition-colors duration-500">GH₵ {(totalRevenue * 0.12).toLocaleString()}</h4>
                                         </div>
-                                        <div className="p-8 bg-slate-50 rounded-3xl space-y-2">
-                                            <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Held for Payout</p>
-                                            <h4 className="text-3xl font-black text-slate-800 tracking-tight">GH₵ {(totalRevenue * 0.05).toLocaleString()}</h4>
+                                        <div className="p-10 bg-white/[0.02] border border-white/5 rounded-[2.5rem] space-y-3 group hover:border-primary/30 transition-all duration-500 relative overflow-hidden">
+                                            <div className="absolute top-0 right-0 p-6 text-primary/5">
+                                                <ShieldCheck size={60} />
+                                            </div>
+                                            <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em]">Settlement Reserve</p>
+                                            <h4 className="text-4xl font-black text-white tracking-tighter tabular-nums group-hover:text-primary transition-colors duration-500">GH₵ {(totalRevenue * 0.05).toLocaleString()}</h4>
                                         </div>
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <p className="text-sm font-bold text-slate-600 leading-relaxed">
-                                            By initiating this payout, you are authorizing the system to process settlements for all campus representatives and system partners. This action is logged for financial audit.
-                                        </p>
+                                    <div className="p-10 bg-secondary/5 border border-secondary/20 rounded-[2.5rem] relative overflow-hidden group">
+                                        <div className="absolute inset-0 bg-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <div className="relative flex gap-6 items-start">
+                                            <AlertCircle size={28} className="text-secondary shrink-0 mt-1" />
+                                            <p className="text-[10px] font-black text-secondary uppercase tracking-[0.3em] leading-relaxed">
+                                                INITIATING THIS OVERRIDE WILL AUTHORIZE GLOBAL LIQUIDITY SETTLEMENT FOR ALL ACTIVE AGENT NODES AND FIELD REPRESENTATIVES. TRANSACTION LOGS WILL BE PERMANENTLY RECORDED IN THE CORE BLOCKCHAIN LEDGER.
+                                            </p>
+                                        </div>
                                     </div>
 
-                                    <div className="pt-6 flex justify-end">
-                                        <button 
-                                            onClick={handleInitiatePayout}
-                                            disabled={payoutLoading}
-                                            className="w-full bg-[#0D9488] hover:bg-teal-700 text-white font-black py-6 rounded-3xl transition-all shadow-xl shadow-teal-700/20 flex items-center justify-center space-x-3 disabled:opacity-50"
-                                        >
-                                            {payoutLoading ? <Loader2 className="animate-spin" size={24} /> : <Wallet size={24} />}
-                                            <span className="text-lg">Initiate Bulk Payout Cycle</span>
-                                        </button>
-                                    </div>
+                                    <button 
+                                        onClick={handleInitiatePayout}
+                                        disabled={payoutLoading}
+                                        className="w-full bg-secondary text-card font-black text-xs uppercase tracking-[0.5em] py-8 rounded-[2rem] transition-all shadow-[0_0_50px_rgba(255,160,0,0.3)] hover:shadow-secondary/50 flex items-center justify-center gap-6 disabled:opacity-20 translate-y-0 hover:-translate-y-1 active:scale-[0.98] duration-300"
+                                    >
+                                        {payoutLoading ? <Loader2 className="animate-spin" size={28} /> : <Wallet size={28} />}
+                                        <span>Authorize Grid Settlement</span>
+                                    </button>
                                 </>
                             )}
                         </div>

@@ -16,15 +16,17 @@ export async function inviteRep(formData: {
     current_level: number
 }) {
     try {
-        // 1. Create the user via Supabase Auth Admin API
-        const { data: userData, error: createError } = await supabaseAdmin.auth.admin.createUser({
-            email: formData.email,
-            password: formData.password || 'Temporary123!', // Fallback if admin didn't set one
-            email_confirm: true,
-            user_metadata: { full_name: formData.full_name }
-        })
+        // 1. Invite the user via Supabase Auth Admin API
+        // This will trigger the confirmation email through your configured Resend SMTP.
+        const { data: userData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
+            formData.email,
+            { 
+                data: { full_name: formData.full_name },
+                redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/login`
+            }
+        )
 
-        if (createError) throw createError
+        if (inviteError) throw inviteError
 
         const userId = userData.user.id
 
@@ -40,9 +42,7 @@ export async function inviteRep(formData: {
                 university_id: formData.university_id,
                 faculty_id: formData.faculty_id,
                 current_level: formData.current_level,
-                role: 'rep',
-                is_rep: true,
-                status: 'Pending'
+                is_rep: true
             })
 
         if (profileError) throw profileError

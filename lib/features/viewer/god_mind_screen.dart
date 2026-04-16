@@ -181,7 +181,7 @@ class _GodMindScreenState extends ConsumerState<GodMindScreen>
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(
-              'GOD MIND',
+              'UNIPAST AI',
               style: GoogleFonts.orbitron(
                 color: _GM.primary,
                 fontSize: 13,

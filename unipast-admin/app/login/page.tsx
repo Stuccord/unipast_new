@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, Loader2, ShieldCheck, Zap } from 'lucide-react'
 
 export default function LoginPage() {
     const [email, setEmail] = useState('')
@@ -12,7 +12,33 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [debugStep, setDebugStep] = useState<string | null>(null)
+    const [mode, setMode] = useState<'login' | 'reset'>('login')
+    const [resetSent, setResetSent] = useState(false)
     const router = useRouter()
+
+    const handleResetPassword = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setLoading(true)
+        setError(null)
+        setDebugStep('Initiating Recovery...')
+
+        try {
+            const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/login/update-password`,
+            })
+
+            if (resetError) {
+                setError(resetError.message)
+            } else {
+                setResetSent(true)
+            }
+        } catch (err: any) {
+            setError(err.message || 'Recovery failed')
+        } finally {
+            setLoading(false)
+            setDebugStep(null)
+        }
+    }
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -60,151 +86,202 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="relative min-h-screen flex flex-col items-center justify-center p-4">
-            {/* Premium CSS Background */}
-            <div className="fixed inset-0 z-0 bg-[#042F2C]">
-                {/* Modern Mesh Gradient / "Glassmorphism" feel */}
-                <div className="absolute inset-0 opacity-40" 
+        <div className="relative min-h-screen flex flex-col items-center justify-center p-4 bg-bg overflow-hidden font-inter">
+            {/* Animated Neural Background Effect */}
+            <div className="absolute inset-0 z-0">
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+                <div className="absolute inset-0 opacity-[0.03]" 
                     style={{
-                        backgroundImage: `
-                            radial-gradient(at 0% 0%, #0D9488 0, transparent 50%),
-                            radial-gradient(at 50% 0%, #115E59 0, transparent 50%),
-                            radial-gradient(at 100% 0%, #0D9488 0, transparent 50%),
-                            radial-gradient(at 50% 100%, #134E4A 0, transparent 50%)
-                        `
-                    }} 
-                />
-                <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-[2px]" />
-                
-                {/* Subtle animated overlay */}
-                <div className="absolute inset-0 opacity-20 animate-pulse-slow" 
-                    style={{
-                        backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0)',
-                        backgroundSize: '40px 40px'
+                        backgroundImage: `radial-gradient(circle at 2px 2px, #00FFCC 1px, transparent 0)`,
+                        backgroundSize: '32px 32px'
                     }}
                 />
             </div>
 
             {/* Login Card */}
-            <div className="relative z-10 w-full max-w-[400px] bg-white rounded-2xl shadow-2xl overflow-hidden border border-white/20 transition-all hover:shadow-teal-900/20">
-                {/* Card Header */}
-                <div className="bg-[#0D9488] p-8 text-white text-center flex flex-col items-center">
-                    <div className="w-16 h-16 mb-4 relative drop-shadow-md">
-                        {/* Placeholder for UniPast Logo - Using a stylized icon for now */}
-                        <div className="w-full h-full bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
-                            <span className="text-3xl font-bold tracking-tighter">U</span>
-                        </div>
-                        <div className="absolute -top-1 -right-1 text-yellow-400">
-                            <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                            </svg>
+            <div className="relative z-10 w-full max-w-[450px] animate-in fade-in slide-in-from-bottom-8 duration-700">
+                {/* Logo Section */}
+                <div className="flex flex-col items-center mb-10">
+                    <div className="relative w-24 h-24 mb-6">
+                        <div className="absolute inset-0 bg-primary/20 rounded-2xl blur-xl animate-pulse" />
+                        <div className="relative w-full h-full bg-card/80 backdrop-blur-xl border-2 border-primary/50 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(0,255,204,0.3)]">
+                            <div className="relative">
+                                <span className="text-4xl font-black font-orbitron text-primary tracking-tighter">U</span>
+                                <div className="absolute -top-1 -right-4 w-3 h-3 bg-accent rounded-full animate-bounce shadow-[0_0_10px_#FFB800]" />
+                            </div>
                         </div>
                     </div>
-                    <h1 className="text-2xl font-bold tracking-tight">Admin Portal Login</h1>
-                    <p className="mt-1 text-teal-50/80 text-sm font-medium">Welcome back! Please sign in to manage UniPast.</p>
+                    <h1 className="text-3xl font-black font-orbitron text-white tracking-[0.2em] mb-2 uppercase">UniPast</h1>
+                    <div className="flex items-center gap-2">
+                        <div className="h-[1px] w-8 bg-primary/30" />
+                        <p className="text-primary/70 text-[10px] font-black uppercase tracking-[0.3em] font-orbitron">Admin Portal</p>
+                        <div className="h-[1px] w-8 bg-primary/30" />
+                    </div>
                 </div>
 
-                {/* Form Section */}
-                <form onSubmit={handleLogin} className="p-8 space-y-5">
-                    {error && (
-                        <div className="bg-red-50 text-red-600 p-3 rounded-xl text-xs font-semibold border border-red-100 animate-in fade-in slide-in-from-top-1 duration-300">
-                            {error}
+                {/* Glass Card */}
+                <div className="bg-card/40 backdrop-blur-2xl rounded-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
+                    <div className="p-10">
+                        <div className="mb-10 text-center">
+                            <h2 className="text-xl font-bold font-orbitron text-white mb-2 uppercase tracking-wide">
+                                {mode === 'login' ? 'Initialize Connection' : 'Neural Recovery'}
+                            </h2>
+                            <p className="text-white/50 text-xs font-medium uppercase tracking-widest leading-relaxed">
+                                {mode === 'login' 
+                                    ? 'AUTHENTICATE YOUR CREDENTIALS TO ACCESS THE CORE' 
+                                    : 'SUPPLY YOUR NEURO-ADDRESS TO RESET THE SECURITY CIPHER'}
+                            </p>
                         </div>
-                    )}
 
-                    {debugStep && !error && (
-                        <div className="bg-teal-50 text-teal-700 p-3 rounded-xl text-xs font-semibold border border-teal-100 flex items-center gap-2">
-                            <Loader2 size={14} className="animate-spin" />
-                            {debugStep}
-                        </div>
-                    )}
-
-                    <div className="space-y-1.5">
-                        <label className="text-[13px] font-bold text-slate-700 ml-1">Email Address</label>
-                        <div className="relative group">
-                            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-teal-600 transition-colors">
-                                <Mail size={18} />
+                        {resetSent ? (
+                            <div className="space-y-8 py-4 animate-in fade-in zoom-in duration-500">
+                                <div className="bg-primary/10 border border-primary/20 p-8 rounded-3xl text-center">
+                                    <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_20px_rgba(0,255,204,0.2)]">
+                                        <Mail className="text-primary" size={28} />
+                                    </div>
+                                    <h3 className="text-white font-bold font-orbitron uppercase tracking-widest mb-3">Signal Dispatched</h3>
+                                    <p className="text-white/40 text-[10px] leading-relaxed uppercase tracking-wider">
+                                        AN ENCRYPTED RECOVERY UPLINK HAS BEEN SENT TO <br/>
+                                        <span className="text-primary">{email.toUpperCase()}</span>
+                                    </p>
+                                </div>
+                                <button 
+                                    onClick={() => { setMode('login'); setResetSent(false); }}
+                                    className="w-full py-4 text-[10px] font-black text-white/30 hover:text-white uppercase tracking-[0.3em] font-orbitron transition-all"
+                                >
+                                    Return to Authentication
+                                </button>
                             </div>
-                            <input
-                                type="email"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-600/10 focus:border-teal-600 outline-none transition text-[15px] text-slate-900 bg-slate-50/50 hover:bg-slate-50"
-                                placeholder="yourname@email.com"
-                            />
-                        </div>
-                    </div>
+                        ) : (
+                            <form onSubmit={mode === 'login' ? handleLogin : handleResetPassword} className="space-y-6">
+                            {error && (
+                                <div className="bg-danger/10 text-danger p-4 rounded-xl text-xs font-bold border border-danger/20 flex items-center gap-3 animate-shake">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-danger animate-ping" />
+                                    {error.toUpperCase()}
+                                </div>
+                            )}
 
-                    <div className="space-y-1.5">
-                        <label className="text-[13px] font-bold text-slate-700 ml-1">Password</label>
-                        <div className="relative group">
-                            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-teal-600 transition-colors">
-                                <Lock size={18} />
+                            {debugStep && !error && (
+                                <div className="bg-primary/10 text-primary p-4 rounded-xl text-xs font-bold border border-primary/20 flex items-center gap-3 transition-all">
+                                    <Loader2 size={16} className="animate-spin" />
+                                    {debugStep.toUpperCase()}
+                                </div>
+                            )}
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] font-orbitron ml-1">Neuro-Address</label>
+                                <div className="relative group">
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-all duration-300">
+                                        <Mail size={18} />
+                                    </div>
+                                    <input
+                                        type="email"
+                                        required
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="w-full pl-12 pr-4 py-4 rounded-2xl border border-white/5 bg-white/5 focus:bg-white/10 focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all duration-300 text-[15px] font-medium text-white placeholder:text-white/20"
+                                        placeholder="user@unipast.core"
+                                    />
+                                </div>
                             </div>
-                            <input
-                                type={showPassword ? 'text' : 'password'}
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full pl-11 pr-11 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-600/10 focus:border-teal-600 outline-none transition text-[15px] text-slate-900 bg-slate-50/50 hover:bg-slate-50"
-                                placeholder="Enter your password"
-                            />
+
+                            {mode === 'login' && (
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] font-orbitron ml-1">Security Cipher</label>
+                                    <div className="relative group">
+                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-all duration-300">
+                                            <Lock size={18} />
+                                        </div>
+                                        <input
+                                            type={showPassword ? 'text' : 'password'}
+                                            required
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            className="w-full pl-12 pr-12 py-4 rounded-2xl border border-white/5 bg-white/5 focus:bg-white/10 focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all duration-300 text-[15px] font-medium text-white placeholder:text-white/20"
+                                            placeholder="••••••••••••"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-primary transition-colors"
+                                        >
+                                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
                             <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-teal-600 transition-colors"
+                                type="submit"
+                                disabled={loading}
+                                className="group relative w-full h-[60px] mt-4 flex items-center justify-center overflow-hidden rounded-2xl transition-all duration-500 disabled:opacity-50"
                             >
-                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                <div className="absolute inset-0 bg-primary group-hover:bg-primary/90 transition-colors" />
+                                <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-[linear-gradient(45deg,transparent,rgba(255,255,255,0.4),transparent)] -translate-x-full group-hover:translate-x-full transition-all duration-1000" />
+                                <span className="relative text-card text-sm font-black font-orbitron uppercase tracking-[0.3em] flex items-center gap-3">
+                                    {loading ? (
+                                        <Loader2 size={18} className="animate-spin" />
+                                    ) : (
+                                        <>
+                                            Authenticate
+                                            <Zap size={16} className="fill-current" />
+                                        </>
+                                    )}
+                                </span>
                             </button>
-                        </div>
-                        <div className="flex justify-end pt-1">
-                            <button type="button" className="text-[13px] font-bold text-teal-600 hover:text-teal-700 hover:underline">
-                                Forgot password?
-                            </button>
-                        </div>
+
+                            <div className="pt-6 flex flex-col items-center gap-4">
+                                <button 
+                                    type="button" 
+                                    onClick={() => setMode(mode === 'login' ? 'reset' : 'login')}
+                                    className="text-[10px] font-black text-white/30 hover:text-primary uppercase tracking-[0.2em] font-orbitron transition-colors"
+                                >
+                                    {mode === 'login' ? 'Forgot security cipher?' : 'Return to Authentication'}
+                                </button>
+                                {mode === 'login' && (
+                                    <>
+                                        <div className="h-[1px] w-12 bg-white/5" />
+                                        <div className="flex items-center gap-3 py-1 cursor-pointer group">
+                                            <div className="w-4 h-4 rounded-md border-2 border-white/10 group-hover:border-primary/50 transition-all flex items-center justify-center overflow-hidden">
+                                                <input
+                                                    type="checkbox"
+                                                    id="remember"
+                                                    className="opacity-0 absolute w-4 h-4 cursor-pointer"
+                                                />
+                                                <ShieldCheck size={12} className="text-primary translate-y-4 group-hover:translate-y-0 transition-all duration-300" />
+                                            </div>
+                                            <label htmlFor="remember" className="text-[10px] font-black text-white/30 cursor-pointer group-hover:text-white transition-colors uppercase tracking-widest">
+                                                Persist Connection
+                                            </label>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </form>
+                      )}
                     </div>
+                </div>
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-[#0D9488] hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-teal-900/20 transition-all transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed uppercase tracking-wider text-sm mt-2"
-                    >
-                        {loading ? 'Sign In...' : 'Sign In'}
-                    </button>
-
-                    <div className="flex items-center gap-2 pt-1 ml-1 cursor-pointer group">
-                        <input
-                            type="checkbox"
-                            id="remember"
-                            className="w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-600"
-                        />
-                        <label htmlFor="remember" className="text-[13px] font-bold text-slate-600 cursor-pointer group-hover:text-slate-800 transition-colors">
-                            Remember me
-                        </label>
-                    </div>
-                </form>
-            </div>
-
-            {/* Footer */}
-            <div className="mt-8 text-center text-slate-600/80">
-                <p className="text-[13px] font-medium tracking-tight">
-                    © 2024 UniPast Ltd. All rights reserved. | <span className="font-bold cursor-pointer hover:text-slate-900">Terms & Privacy</span>
-                </p>
-                <p className="text-[12px] font-medium mt-1">
-                    Responsive Design | Optimized for Web
-                </p>
+                <div className="mt-12 text-center">
+                    <p className="text-[10px] font-black text-white/10 uppercase tracking-[0.4em] font-orbitron">
+                        UniPast Operational Terminal v4.0.2
+                    </p>
+                </div>
             </div>
 
             <style jsx global>{`
-                @keyframes pulse-slow {
-                    0%, 100% { opacity: 0.95; }
-                    50% { opacity: 1; }
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    25% { transform: translateX(-4px); }
+                    75% { transform: translateX(4px); }
                 }
-                .animate-pulse-slow {
-                    animation: pulse-slow 8s ease-in-out infinite;
+                .animate-shake {
+                    animation: shake 0.2s ease-in-out infinite alternate;
+                    animation-iteration-count: 2;
                 }
             `}</style>
         </div>
     )
 }
+
