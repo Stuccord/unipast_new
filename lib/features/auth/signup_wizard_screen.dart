@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:unipast/core/theme.dart';
 import 'package:unipast/core/ui_helpers.dart';
 import 'package:unipast/features/auth/signup_notifier.dart';
+import 'package:unipast/features/auth/auth_service.dart';
 import 'package:unipast/features/browse/browse_service.dart';
 
 // ---------------------------------------------------------------------------
