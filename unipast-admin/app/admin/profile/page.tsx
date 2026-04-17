@@ -1,5 +1,7 @@
 'use client'
 
+
+
 import { useState, useEffect } from 'react'
 import { User, Mail, Shield, Camera, Edit2, Loader2, CheckCircle2, AlertCircle, Cpu, Zap, Activity, Monitor } from 'lucide-react'
 import { supabase } from '@/lib/supabase'

@@ -52,7 +52,8 @@ export default function AdminLayout({
                 if (data) {
                     setProfile(data)
                     const isRep = data.role === 'rep' || data.is_rep
-                    const restrictedPaths = ['/admin/financials', '/admin/analytics', '/admin/academic', '/admin/reps', '/admin/settings']
+                    // Allow reps to access academic page for contributing faculty/programs/courses
+                    const restrictedPaths = ['/admin/financials', '/admin/analytics', '/admin/reps', '/admin/settings']
                     if (isRep && restrictedPaths.includes(pathname)) {
                         router.push('/admin')
                     }
@@ -85,7 +86,8 @@ export default function AdminLayout({
     const visibleNavItems = navItems.filter(item => {
         const isRep = profile?.role === 'rep' || profile?.is_rep
         if (isRep) {
-            return ['Terminal', 'Resources', 'Injection'].includes(item.name)
+            // Reps can now access Core Setup (Academic)
+            return ['Terminal', 'Resources', 'Injection', 'Core Setup'].includes(item.name)
         }
         return true
     })

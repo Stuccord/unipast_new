@@ -182,21 +182,30 @@ REVOKE EXECUTE ON FUNCTION activate_subscription(UUID, TEXT, INTEGER, TEXT, TIME
 ALTER TABLE IF EXISTS public.universities ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Universities are viewable by everyone" ON public.universities;
 CREATE POLICY "Universities are viewable by everyone" ON public.universities FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Only admins can insert universities" ON public.universities;
+CREATE POLICY "Only admins can insert universities" ON public.universities FOR INSERT TO authenticated 
+WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
 
 -- Faculties
 ALTER TABLE IF EXISTS public.faculties ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Faculties are viewable by everyone" ON public.faculties;
 CREATE POLICY "Faculties are viewable by everyone" ON public.faculties FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Authenticated users can insert faculties" ON public.faculties;
+CREATE POLICY "Authenticated users can insert faculties" ON public.faculties FOR INSERT TO authenticated WITH CHECK (true);
 
 -- Programmes
 ALTER TABLE IF EXISTS public.programmes ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Programmes are viewable by everyone" ON public.programmes;
 CREATE POLICY "Programmes are viewable by everyone" ON public.programmes FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Authenticated users can insert programmes" ON public.programmes;
+CREATE POLICY "Authenticated users can insert programmes" ON public.programmes FOR INSERT TO authenticated WITH CHECK (true);
 
 -- Courses
 ALTER TABLE IF EXISTS public.courses ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Courses are viewable by everyone" ON public.courses;
 CREATE POLICY "Courses are viewable by everyone" ON public.courses FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Authenticated users can insert courses" ON public.courses;
+CREATE POLICY "Authenticated users can insert courses" ON public.courses FOR INSERT TO authenticated WITH CHECK (true);
 
 -- Past Questions
 ALTER TABLE IF EXISTS public.past_questions ENABLE ROW LEVEL SECURITY;

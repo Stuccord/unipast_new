@@ -46,13 +46,20 @@ class _PaymentWebViewState extends State<PaymentWebView> {
 
       if (kIsWeb) {
         // On web: redirect the browser tab directly to Paystack checkout.
-        // Paystack will redirect back to the callback_url after payment.
+        // We use '_self' so it acts as a smooth page transition and avoids aggressive mobile popup blockers.
         final uri = Uri.parse(_rawUrl!);
         if (await canLaunchUrl(uri)) {
-          await launchUrl(uri, mode: LaunchMode.platformDefault);
+          await launchUrl(uri, webOnlyWindowName: '_self');
         }
-        // Pop this widget — the browser has navigated away
-        if (mounted) Navigator.of(context).pop();
+        
+        // If the redirect doesn't happen instantly, render a fallback button 
+        // instead of popping the widget.
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _error = 'Redirect paused or blocked by browser.\n\nPlease click the button below to securely open Checkout.';
+          });
+        }
         return;
       }
 

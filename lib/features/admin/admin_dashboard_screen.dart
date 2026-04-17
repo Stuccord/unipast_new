@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unipast/core/theme.dart';
 import 'package:unipast/features/admin/admin_service.dart';
+import 'package:unipast/features/auth/profile_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
@@ -21,52 +22,59 @@ class AdminDashboardScreen extends ConsumerStatefulWidget {
 
 class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen>
     with TickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 5, vsync: this);
-  }
+  TabController? _tabController;
+  int _lastTabCount = 0;
 
   @override
   void dispose() {
-    _tabController.dispose();
+    _tabController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final profile = ref.watch(myProfileProvider).value;
+    final isAdmin = profile?.isAdmin ?? false;
+
+    // Define tabs based on role
+    final List<Map<String, dynamic>> tabs = [];
+    if (isAdmin) {
+      tabs.add({'title': 'Overview', 'icon': Icons.dashboard_rounded, 'view': const _OverviewTab()});
+      tabs.add({'title': 'Upload', 'icon': Icons.cloud_upload_rounded, 'view': _UploadTab()});
+      tabs.add({'title': 'Academic', 'icon': Icons.school_rounded, 'view': const _AcademicTab()});
+      tabs.add({'title': 'Financials', 'icon': Icons.payments_rounded, 'view': const _FinancialsTab()});
+      tabs.add({'title': 'History', 'icon': Icons.history_rounded, 'view': const _ActivitiesTab()});
+    } else {
+      // Reps and Students
+      tabs.add({'title': 'Upload', 'icon': Icons.cloud_upload_rounded, 'view': _UploadTab()});
+      tabs.add({'title': 'Academic', 'icon': Icons.school_rounded, 'view': const _AcademicTab()});
+    }
+
+    // Initialize or Update TabController
+    if (_tabController == null || _lastTabCount != tabs.length) {
+      _tabController?.dispose();
+      _tabController = TabController(length: tabs.length, vsync: this);
+      _lastTabCount = tabs.length;
+    }
+
     return Scaffold(
+      backgroundColor: const Color(0xFF05080F),
       appBar: AppBar(
         title: Text(
-          'Admin Console',
-          style: GoogleFonts.playfairDisplay(fontWeight: FontWeight.bold),
+          isAdmin ? 'Admin Console' : 'Academic Console',
+          style: GoogleFonts.orbitron(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         bottom: TabBar(
-          controller: _tabController,
+          controller: _tabController!,
           isScrollable: true,
-          labelStyle:
-              GoogleFonts.playfairDisplay(fontWeight: FontWeight.w600, fontSize: 13),
-          indicatorColor: AppTheme.accentGold,
-          tabs: const [
-            Tab(text: 'Overview', icon: Icon(Icons.dashboard_rounded)),
-            Tab(text: 'Upload', icon: Icon(Icons.cloud_upload_rounded)),
-            Tab(text: 'Academic', icon: Icon(Icons.school_rounded)),
-            Tab(text: 'Financials', icon: Icon(Icons.payments_rounded)),
-            Tab(text: 'Activity Feed', icon: Icon(Icons.history_rounded)),
-          ],
+          labelStyle: GoogleFonts.orbitron(fontWeight: FontWeight.w600, fontSize: 12, letterSpacing: 1),
+          indicatorColor: const Color(0xFF00E5CC),
+          tabs: tabs.map((t) => Tab(text: t['title'], icon: Icon(t['icon']))).toList(),
         ),
       ),
       body: TabBarView(
-        controller: _tabController,
-        children: [
-          const _OverviewTab(),
-          _UploadTab(),
-          const _AcademicTab(),
-          const _FinancialsTab(),
-          const _ActivitiesTab(),
-        ],
+        controller: _tabController!,
+        children: tabs.map((t) => t['view'] as Widget).toList(),
       ),
     );
   }
@@ -303,7 +311,7 @@ class _AcademicTab extends ConsumerWidget {
   }
 }
 
-class _ManagementTiles extends StatelessWidget {
+class _ManagementTiles extends ConsumerWidget {
   const _ManagementTiles();
 
   Widget _buildTile(
@@ -324,7 +332,10 @@ class _ManagementTiles extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profile = ref.watch(myProfileProvider).value;
+    final isAdmin = profile?.isAdmin ?? false;
+
     return Column(
       children: [
         _buildTile(
@@ -350,8 +361,9 @@ class _ManagementTiles extends StatelessWidget {
           onTap: () => context.push(
             '/admin/manage',
             extra: {
-              'title': 'Faculties',
+              'title': isAdmin ? 'Faculties' : 'My Faculties',
               'mode': 'faculties',
+              'parentId': isAdmin ? null : profile?.universityId,
             },
           ),
         ),
@@ -364,25 +376,27 @@ class _ManagementTiles extends StatelessWidget {
           onTap: () => context.push(
             '/admin/manage',
             extra: {
-              'title': 'Programmes',
+              'title': isAdmin ? 'Programmes' : 'My Programmes',
               'mode': 'programmes',
+              'parentId': isAdmin ? null : profile?.facultyId,
             },
           ),
         ),
-        _buildTile(
-          context,
-          title: 'Manage Reps',
-          icon: Icons.person_add_rounded,
-          subtitle: 'Add or remove representatives',
-          color: AppTheme.primaryTeal,
-          onTap: () => context.push(
-            '/admin/manage',
-            extra: {
-              'title': 'Course Representatives',
-              'mode': 'reps',
-            },
+        if (isAdmin)
+          _buildTile(
+            context,
+            title: 'Manage Reps',
+            icon: Icons.person_add_rounded,
+            subtitle: 'Add or remove representatives',
+            color: AppTheme.primaryTeal,
+            onTap: () => context.push(
+              '/admin/manage',
+              extra: {
+                'title': 'Course Representatives',
+                'mode': 'reps',
+              },
+            ),
           ),
-        ),
       ],
     );
   }

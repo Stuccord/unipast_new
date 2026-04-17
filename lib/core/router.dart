@@ -131,10 +131,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/admin/manage',
         builder: (context, state) {
-          final extra = state.extra as Map<String, String>?;
+          final extra = state.extra as Map<String, dynamic>?;
           return AdminManagementScreen(
             title: extra?['title'] ?? 'Management',
             mode: extra?['mode'] ?? 'universities',
+            parentId: extra?['parentId'],
           );
         },
       ),

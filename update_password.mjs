@@ -2,7 +2,7 @@ import https from 'https';
 
 const SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6YnFzdmZ4cGtheWdvY2pvZGprIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjc4NDYxNCwiZXhwIjoyMDg4MzYwNjE0fQ.Yd2Y-L4QLeCtx--6-pCBWF2QI2dyw6RgWOF0yUzicjg';
 const SUPABASE_URL = 'hzbqsvfxpkaygocjodjk.supabase.co';
-const EMAIL = 'admin@unipast.com';
+const EMAIL = 'admin@unipast.app';
 const PASSWORD = 'Ebube123...';
 
 function request(options, body) {

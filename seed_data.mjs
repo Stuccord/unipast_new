@@ -117,7 +117,7 @@ async function main() {
     // 6. Update Admin User Profile
     console.log('Updating Admin Profile with Academic Info...');
     // We already know admin email
-    const EMAIL = 'admin@unipast.com';
+    const EMAIL = 'admin@unipast.app';
     
     // Fetch admin user ID
     const listRes = await request({

@@ -36,11 +36,19 @@ export async function uploadPastQuestion(formData: FormData) {
 
     if (dbError) return { error: dbError.message }
 
-    // 3. Trigger a global notification
+    // 3. Fetch programme_id to trigger a targeted notification
+    const { data: courseData } = await supabaseAdmin
+        .from('courses')
+        .select('programme_id')
+        .eq('id', course_id)
+        .single()
+
     await supabaseAdmin.from('notifications').insert({
         title: 'New Past Question Available!',
         message: `${title || 'A new paper'} has been uploaded for your course.`,
-        type: 'info'
+        type: 'info',
+        course_id,
+        programme_id: courseData?.programme_id
     })
     return { success: true }
 }

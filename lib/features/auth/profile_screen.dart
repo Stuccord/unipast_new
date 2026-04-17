@@ -12,6 +12,7 @@ import 'package:unipast/features/auth/auth_service.dart';
 import 'package:unipast/features/auth/stats_service.dart';
 import 'package:unipast/features/payment/payment_service.dart';
 import 'package:unipast/core/lookup_data.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'package:unipast/core/god_mind_theme.dart';
 
@@ -144,18 +145,47 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                           ),
                           const SizedBox(height: 32),
 
-                          // Admin Section
+                          // Admin Section or Student Resources
                           if (profile.isAdmin) ...[
-                            const _SectionTitle(title: 'Administration'),
+                            const _SectionTitle(title: 'Administrative Center'),
                             const SizedBox(height: 16),
                             _GodMindSettingsCard(
                               children: [
                                 _GodMindSettingsTile(
                                   icon: Icons.admin_panel_settings_rounded,
                                   iconColor: GMTheme.danger,
-                                  title: 'Admin Dashboard',
+                                  title: 'God Mind Console',
                                   subtitle: 'Manage platform content & users',
                                   onTap: () => context.push('/admin'),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 32),
+                          ] else ...[
+                            const _SectionTitle(title: 'Student Resources'),
+                            const SizedBox(height: 16),
+                            _GodMindSettingsCard(
+                              children: [
+                                _GodMindSettingsTile(
+                                  icon: Icons.volunteer_activism_rounded,
+                                  iconColor: GMTheme.primary,
+                                  title: 'Request Material',
+                                  subtitle: 'Can\'t find a past question? Request it',
+                                  onTap: () => launchUrl(Uri.parse('mailto:support@unipast.app?subject=Past Question Request')),
+                                ),
+                                _GodMindSettingsTile(
+                                  icon: Icons.share_rounded,
+                                  iconColor: GMTheme.secondary,
+                                  title: 'Share UniPast',
+                                  subtitle: 'Help other students excel',
+                                  onTap: () {
+                                    SharePlus.instance.share(
+                                      ShareParams(
+                                        text: 'Ace your university exams with UniPast! 🚀 Get access to thousands of past questions and brilliant AI tools. Download now: https://unipast.app',
+                                        subject: 'Check out UniPast!',
+                                      ),
+                                    );
+                                  },
                                 ),
                               ],
                             ),
@@ -172,7 +202,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                                 iconColor: GMTheme.textMuted,
                                 title: 'Privacy & Terms',
                                 onTap: () => launchUrl(
-                                  Uri.parse('https://unipast.com/privacy'),
+                                  Uri.parse('https://unipast.app/privacy'),
                                   mode: LaunchMode.externalApplication,
                                 ),
                               ),
@@ -234,7 +264,7 @@ class _GodMindProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 280,
+      expandedHeight: 320,
       pinned: true,
       backgroundColor: Colors.transparent,
       flexibleSpace: ClipRRect(
@@ -255,7 +285,7 @@ class _GodMindProfileHeader extends StatelessWidget {
               background: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 50),
                   Container(
                     width: 110,
                     height: 110,
@@ -278,8 +308,30 @@ class _GodMindProfileHeader extends StatelessWidget {
                       color: GMTheme.text,
                       letterSpacing: 1.5,
                     ),
+                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${LookupData.getProgrammeName(profile.programmeId)}',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: GMTheme.primary,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${LookupData.getUniversityName(profile.universityId)}',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: GMTheme.textMuted,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
